@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import SharedModule from 'app/shared/shared.module';
 import { LoginService } from 'app/login/login.service';
 import { AccountService } from 'app/core/auth/account.service';
+import { IUser } from 'app/entities/user/user.model';
 
 @Component({
   selector: 'jhi-login',
@@ -49,7 +50,7 @@ export default class LoginComponent implements OnInit, AfterViewInit {
         this.authenticationError = false;
         if (!this.router.getCurrentNavigation()) {
           // There were no routing during login (eg from navigationToStoredUrl)
-          this.router.navigate(['']);
+          this.router.navigate(['/chat']);
         }
       },
       error: () => (this.authenticationError = true),

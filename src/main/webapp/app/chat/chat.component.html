@@ -1,0 +1,43 @@
+<div class="chat-container" id="chat-page">
+    <div class="users-list">
+        <div class="users-list-container">
+            <h2>Online Users</h2>
+            <ul class="p-1" id="connectedUsers">
+                <li *ngFor="let user of users; let i=index">
+                    <button class="btn w-100" [ngClass]="user.isOnline ? 'btn-info text-light' : 'btn-danger'" (click)="openChat(user, true)">
+                        {{ user.login }} <span class="badge">{{ user.isOnline ? 'online' : 'offline' }}</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="chat-area">
+        <div class="recipient-header" *ngIf="selectedRecipient"> 
+            <p> {{ selectedRecipient.login }} </p> 
+            <small><span [ngClass]=" selectedRecipient.isOnline ? 'text-light': 'text-danger'"><fa-icon icon="circle" size="xs"></fa-icon></span> {{ selectedRecipient.isOnline ? 'online':'offline' }}</small>
+        </div>
+        <div class="chat-area p-2" id="chat-messages" #chatMessages>
+            <ng-container *ngFor="let groupedMessage of groupedMessages; let i=index">
+                <div  class="separator">
+                    <span class="date">
+                        {{ groupedMessage.date }}
+                    </span>
+                </div>
+                <ng-container *ngFor="let message of groupedMessage.messages; let i=index">
+                    <div class="message-box" [ngClass]="message.sender==account!.login ? 'sender':'receiver'">
+                        <p> {{ message.content }} </p>
+                        <small class="delivery-time"> {{ getTime(message.deliveryTime!.toString()) }} </small>
+                    </div>
+                </ng-container>
+            </ng-container>
+        </div>
+
+        <form id="messageForm" name="messageForm">
+            <div class="message-input">
+                <input autocomplete="off" type="text" id="message" placeholder="Type your message..." name="content"  [(ngModel)]="messageForm!.content">
+                <button type="button" (click)="sendMessage()">Send</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,80 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2 id="jhi-message-heading" data-cy="MessageCreateUpdateHeading">Create or edit a Message</h2>
+
+      <div>
+        <jhi-alert-error></jhi-alert-error>
+
+        @if (editForm.controls.id.value !== null) {
+          <div class="mb-3">
+            <label class="form-label" for="field_id">ID</label>
+            <input type="text" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+          </div>
+        }
+
+        <div class="mb-3">
+          <label class="form-label" for="field_sender">Sender</label>
+          <input type="text" class="form-control" name="sender" id="field_sender" data-cy="sender" formControlName="sender" />
+          @if (editForm.get('sender')!.invalid && (editForm.get('sender')!.dirty || editForm.get('sender')!.touched)) {
+            <div>
+              @if (editForm.get('sender')?.errors?.required) {
+                <small class="form-text text-danger">This field is required.</small>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_recipient">Recipient</label>
+          <input type="text" class="form-control" name="recipient" id="field_recipient" data-cy="recipient" formControlName="recipient" />
+          @if (editForm.get('recipient')!.invalid && (editForm.get('recipient')!.dirty || editForm.get('recipient')!.touched)) {
+            <div>
+              @if (editForm.get('recipient')?.errors?.required) {
+                <small class="form-text text-danger">This field is required.</small>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_content">Content</label>
+          <input type="text" class="form-control" name="content" id="field_content" data-cy="content" formControlName="content" />
+          @if (editForm.get('content')!.invalid && (editForm.get('content')!.dirty || editForm.get('content')!.touched)) {
+            <div>
+              @if (editForm.get('content')?.errors?.required) {
+                <small class="form-text text-danger">This field is required.</small>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_room">Room</label>
+          <select class="form-control" id="field_room" data-cy="room" name="room" formControlName="room" [compareWith]="compareRoom">
+            <option [ngValue]="null"></option>
+            @for (roomOption of roomsSharedCollection; track $index) {
+              <option [ngValue]="roomOption">{{ roomOption.id }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban"></fa-icon>&nbsp;<span>Cancel</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save"></fa-icon>&nbsp;<span>Save</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

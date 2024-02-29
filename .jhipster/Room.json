@@ -1,0 +1,33 @@
+{
+  "annotations": {
+    "changelogDate": "20240214034354"
+  },
+  "dto": "mapstruct",
+  "entityTableName": "room",
+  "fields": [
+    {
+      "fieldName": "user1",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "user2",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "deleted1",
+      "fieldType": "Boolean"
+    },
+    {
+      "fieldName": "deleted2",
+      "fieldType": "Boolean"
+    }
+  ],
+  "name": "Room",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

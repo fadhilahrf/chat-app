@@ -1,0 +1,50 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (message) {
+      <div>
+        <h2 data-cy="messageDetailsHeading"><span>Message</span></h2>
+
+        <hr />
+
+        <jhi-alert-error></jhi-alert-error>
+
+        <jhi-alert></jhi-alert>
+
+        <dl class="row-md jh-entity-details">
+          <dt><span>ID</span></dt>
+          <dd>
+            <span>{{ message.id }}</span>
+          </dd>
+          <dt><span>Sender</span></dt>
+          <dd>
+            <span>{{ message.sender }}</span>
+          </dd>
+          <dt><span>Recipient</span></dt>
+          <dd>
+            <span>{{ message.recipient }}</span>
+          </dd>
+          <dt><span>Content</span></dt>
+          <dd>
+            <span>{{ message.content }}</span>
+          </dd>
+          <dt><span>Room</span></dt>
+          <dd>
+            @if (message.room) {
+              <div>
+                <a [routerLink]="['/room', message.room.id, 'view']">{{ message.room.id }}</a>
+              </div>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span>Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/message', message.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span>Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

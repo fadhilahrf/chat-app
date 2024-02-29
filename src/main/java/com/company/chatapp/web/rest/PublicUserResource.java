@@ -12,6 +12,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.PaginationUtil;
@@ -54,6 +56,15 @@ public class PublicUserResource {
         return pageable.getSort().stream().map(Sort.Order::getProperty).allMatch(ALLOWED_ORDERED_PROPERTIES::contains);
     }
 
+    @GetMapping("/users/all")
+    public ResponseEntity<List<UserDTO>> getAllPublicUsers() {
+        log.debug("REST request to get all public User names");
+
+        List<UserDTO> users = userService.getAllPublicUsers();
+        
+        return ResponseEntity.ok(users);
+    }
+
     /**
      * Gets a list of all roles.
      * @return a string list of all roles.
@@ -61,5 +72,17 @@ public class PublicUserResource {
     @GetMapping("/authorities")
     public List<String> getAuthorities() {
         return userService.getAuthorities();
+    }
+
+    @MessageMapping("/user.connect")
+    @SendTo("/topic/public")
+    public UserDTO connectUser(UserDTO userDTO) {
+        return new UserDTO(userService.setCurrentUserOnlineStatus(userDTO.getLogin(), true));
+    }
+
+    @MessageMapping("/user.disconnect")
+    @SendTo("/topic/public")
+    public UserDTO disconnectUser(UserDTO userDTO) {
+        return new UserDTO(userService.setCurrentUserOnlineStatus(userDTO.getLogin(), false));
     }
 }

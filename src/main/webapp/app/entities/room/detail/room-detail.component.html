@@ -1,0 +1,46 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (room) {
+      <div>
+        <h2 data-cy="roomDetailsHeading"><span>Room</span></h2>
+
+        <hr />
+
+        <jhi-alert-error></jhi-alert-error>
+
+        <jhi-alert></jhi-alert>
+
+        <dl class="row-md jh-entity-details">
+          <dt><span>ID</span></dt>
+          <dd>
+            <span>{{ room.id }}</span>
+          </dd>
+          <dt><span>User 1</span></dt>
+          <dd>
+            <span>{{ room.user1 }}</span>
+          </dd>
+          <dt><span>User 2</span></dt>
+          <dd>
+            <span>{{ room.user2 }}</span>
+          </dd>
+          <dt><span>Deleted 1</span></dt>
+          <dd>
+            <span>{{ room.deleted1 }}</span>
+          </dd>
+          <dt><span>Deleted 2</span></dt>
+          <dd>
+            <span>{{ room.deleted2 }}</span>
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span>Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/room', room.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span>Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

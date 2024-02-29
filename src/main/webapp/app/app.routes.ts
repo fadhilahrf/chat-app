@@ -7,12 +7,19 @@ import { errorRoute } from './layouts/error/error.route';
 import HomeComponent from './home/home.component';
 import NavbarComponent from './layouts/navbar/navbar.component';
 import LoginComponent from './login/login.component';
+import { ChatComponent } from './chat/chat.component';
 
 const routes: Routes = [
   {
     path: '',
     component: HomeComponent,
     title: 'home.title',
+  },
+  {
+    path: 'chat',
+    component: ChatComponent,
+    title: 'chat',
+    canActivate: [UserRouteAccessService],
   },
   {
     path: '',

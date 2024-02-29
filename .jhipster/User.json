@@ -1,0 +1,19 @@
+{
+  "annotations": {
+    "changelogDate": "20240213115547"
+  },
+  "dto": "mapstruct",
+  "entityTableName": "user",
+  "fields": [
+    {
+      "fieldName": "isOnline",
+      "fieldType": "Boolean"
+    }
+  ],
+  "name": "User",
+  "pagination": "pagination",
+  "readOnly": false,
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

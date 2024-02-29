@@ -10,6 +10,8 @@ import { LoginService } from 'app/login/login.service';
 import { ProfileService } from 'app/layouts/profiles/profile.service';
 import { EntityNavbarItems } from 'app/entities/entity-navbar-items';
 import NavbarItem from './navbar-item.model';
+import { StompService } from 'app/shared/service/stomp.service';
+import { IUser } from 'app/entities/user/user.model';
 
 @Component({
   standalone: true,
@@ -31,6 +33,7 @@ export default class NavbarComponent implements OnInit {
     private accountService: AccountService,
     private profileService: ProfileService,
     private router: Router,
+    private stompService: StompService
   ) {
     if (VERSION) {
       this.version = VERSION.toLowerCase().startsWith('v') ? VERSION : `v${VERSION}`;
@@ -58,8 +61,13 @@ export default class NavbarComponent implements OnInit {
   }
 
   logout(): void {
+    const user: IUser = {
+      id: '',
+      login: this.account?.login,
+    }
     this.collapseNavbar();
     this.loginService.logout();
+    this.stompService.send('/app/user.disconnect', {}, JSON.stringify(user));
     this.router.navigate(['']);
   }
 

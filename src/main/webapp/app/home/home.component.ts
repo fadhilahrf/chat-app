@@ -16,7 +16,6 @@ import { Account } from 'app/core/auth/account.model';
 })
 export default class HomeComponent implements OnInit, OnDestroy {
   account: Account | null = null;
-
   private readonly destroy$ = new Subject<void>();
 
   constructor(
@@ -28,7 +27,9 @@ export default class HomeComponent implements OnInit, OnDestroy {
     this.accountService
       .getAuthenticationState()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(account => (this.account = account));
+      .subscribe(account => {
+        this.account = account;
+      });  
   }
 
   login(): void {

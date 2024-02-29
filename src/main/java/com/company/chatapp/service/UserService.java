@@ -9,6 +9,9 @@ import com.company.chatapp.security.AuthoritiesConstants;
 import com.company.chatapp.security.SecurityUtils;
 import com.company.chatapp.service.dto.AdminUserDTO;
 import com.company.chatapp.service.dto.UserDTO;
+
+import javassist.NotFoundException;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -261,6 +264,10 @@ public class UserService {
         return userRepository.findAllByIdNotNullAndActivatedIsTrue(pageable).map(UserDTO::new);
     }
 
+    public List<UserDTO> getAllPublicUsers() {
+        return userRepository.findAll().stream().map(UserDTO::new).collect(Collectors.toList());
+    }
+
     public Optional<User> getUserWithAuthoritiesByLogin(String login) {
         return userRepository.findOneByLogin(login);
     }
@@ -290,5 +297,20 @@ public class UserService {
      */
     public List<String> getAuthorities() {
         return authorityRepository.findAll().stream().map(Authority::getName).toList();
+    }
+
+    public User setCurrentUserOnlineStatus(String username, Boolean isOnline) {
+        log.debug("set online status to : {}", isOnline);
+        
+        try {
+            User user = userRepository.findOneByLogin(username).orElseThrow(()-> new NotFoundException("User not found"));
+
+            user.setIsOnline(isOnline);
+            return userRepository.save(user);
+        } catch( Exception e ) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

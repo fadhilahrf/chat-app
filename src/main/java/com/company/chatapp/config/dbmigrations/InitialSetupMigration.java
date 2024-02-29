@@ -67,6 +67,7 @@ public class InitialSetupMigration {
         userUser.setEmail("user@localhost");
         userUser.setActivated(true);
         userUser.setLangKey("en");
+        userUser.setIsOnline(false);
         userUser.setCreatedBy(Constants.SYSTEM);
         userUser.setCreatedDate(Instant.now());
         userUser.getAuthorities().add(userAuthority);
@@ -83,6 +84,7 @@ public class InitialSetupMigration {
         adminUser.setEmail("admin@localhost");
         adminUser.setActivated(true);
         adminUser.setLangKey("en");
+        adminUser.setIsOnline(false);
         adminUser.setCreatedBy(Constants.SYSTEM);
         adminUser.setCreatedDate(Instant.now());
         adminUser.getAuthorities().add(adminAuthority);

@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Locale;
@@ -14,13 +13,14 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
  * A user.
  */
-@org.springframework.data.mongodb.core.mapping.Document(collection = "jhi_user")
-public class User extends AbstractAuditingEntity<String> implements Serializable {
+@Document(collection = "user")
+public class User extends AbstractAuditingEntity<String> {
 
     private static final long serialVersionUID = 1L;
 
@@ -73,6 +73,9 @@ public class User extends AbstractAuditingEntity<String> implements Serializable
 
     @Field("reset_date")
     private Instant resetDate = null;
+
+    @Field("is_online")
+    private Boolean isOnline;
 
     @JsonIgnore
     private Set<Authority> authorities = new HashSet<>();
@@ -165,6 +168,15 @@ public class User extends AbstractAuditingEntity<String> implements Serializable
     public void setResetDate(Instant resetDate) {
         this.resetDate = resetDate;
     }
+    
+    public Boolean getIsOnline() {
+        return isOnline;
+    }
+
+    public void setIsOnline(Boolean isOnline) {
+        this.isOnline = isOnline;
+    }
+
 
     public String getLangKey() {
         return langKey;
