@@ -1,6 +1,9 @@
 package com.company.chatapp.domain;
 
 import jakarta.validation.constraints.*;
+
+import java.time.Instant;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -27,6 +30,8 @@ public class Room extends AbstractAuditingEntity<String> {
 
     @Field("deleted_by")
     private String deletedBy;
+
+    private Instant latestMessageTime;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
@@ -80,6 +85,14 @@ public class Room extends AbstractAuditingEntity<String> {
 
     public void setDeletedBy(String deletedBy) {
         this.deletedBy = deletedBy;
+    }
+
+    public Instant getLatestMessageTime() {
+        return latestMessageTime;
+    }
+
+    public void setLatestMessageTime(Instant latestMessageTime) {
+        this.latestMessageTime = latestMessageTime;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

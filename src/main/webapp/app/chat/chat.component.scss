@@ -3,11 +3,10 @@
 
 .chat-container {
     display: flex;
-    max-width: 800px;
-    min-width: 800px;
+    max-width: 100%;
+    min-width: 600px;
     min-height: 600px;
     max-height: 600px;
-    margin: 20px;
     border: 1px solid #ccc;
     background-color: #fff;
     overflow: hidden;
@@ -15,12 +14,10 @@
     border-radius: 8px;
 }
 
-.users-list {
+.chats-list {
     flex: 1;
     border-right: 1px solid #ccc;
-    padding: 20px;
     box-sizing: border-box;
-    background-color: $primary;
     color: #fff;
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
@@ -29,45 +26,21 @@
     justify-content: space-between;
 }
 
-.users-list-container {
+.chats-list-header {
+    background-color: $primary;
+    padding: 10px;
+}
+
+.chats-list-container {
     height: 100%;
     overflow-y: auto;
+    background-color: $info;
 }
 
-.users-list h2 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-}
-
-.users-list ul {
+.chats-list ul {
     list-style: none;
     padding: 0;
     margin: 0;
-}
-
-.user-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-    cursor: pointer;
-}
-
-.user-item.active {
-    background-color: #cdebff;
-    color: #4f4f4f;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-.user-item img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
-
-.user-item span {
-    font-weight: bold;
 }
 
 .separator {
@@ -118,6 +91,7 @@
     border-radius: 5px;
     margin-bottom: 5px;
     min-width: 50px;
+    max-width: 50%;
     p {
         margin-bottom: 0;
     }
@@ -145,23 +119,35 @@
 .message-input {
     margin-top: auto;
     display: flex;
+    background-color: $info;
+
+    input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-right: 10px;
+
+        &:focus {
+            outline: none;
+        }
+    }
 }
 
-.message-input input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-right: 10px;
-}
-
-.message-input button {
-    padding: 10px;
-    border: none;
-    background-color: #3498db;
-    color: #fff;
-    border-radius: 5px;
-    cursor: pointer;
+.search-input {
+    display: flex;
+    background-color: $primary;
+    width: auto;
+    input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        
+        &:focus {
+            outline: none;
+        }
+    }
 }
 
 .user-form {
@@ -223,5 +209,23 @@
         background-color: #fff; 
         padding: 10px;
         border-radius: 5px;
+    }
+}
+
+.list-group-item {
+    cursor: pointer;
+    background-color: $info;
+    color: white;
+    border-left: 0;
+    border-right: 0;
+    font-weight: bold;
+    &.active {
+        background-color: white;
+        color: black;
+    }
+
+    &:hover {
+        background-color: rgb(229, 237, 243);
+        color: black;
     }
 }

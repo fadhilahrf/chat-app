@@ -158,6 +158,13 @@ public class RoomResource {
         return ResponseEntity.ok().body(rooms);
     }
 
+    @GetMapping("/user/latest-message")
+    public ResponseEntity<List<RoomDTO>> getAllRoomsForUserSortedByLatestMessageTime() {
+        log.debug("REST request to get a page of Rooms");
+        List<RoomDTO> rooms = roomService.findAllByCurrentUserSortedByLatestMessageTime();
+        return ResponseEntity.ok().body(rooms);
+    }
+
     /**
      * {@code GET  /rooms/:id} : get the "id" room.
      *

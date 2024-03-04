@@ -1,21 +1,36 @@
 <div class="chat-container" id="chat-page">
-    <div class="users-list">
-        <div class="users-list-container">
-            <h2>Online Users</h2>
-            <ul class="p-1" id="connectedUsers">
-                <li *ngFor="let user of users; let i=index">
-                    <button class="btn w-100" [ngClass]="user.isOnline ? 'btn-info text-light' : 'btn-danger'" (click)="openChat(user, true)">
-                        {{ user.login }} <span class="badge">{{ user.isOnline ? 'online' : 'offline' }}</span>
-                    </button>
-                </li>
+    <div class="chats-list">
+        <div class="chats-list-header">
+            <h2><b>Chats</b></h2>
+        </div>
+        <form id="searchForm" name="searchForm" >
+            <div class="search-input p-2">
+                <button *ngIf="isInputFocused" key class="btn btn-link text-light" type="button" (click)="leaveSearch()"><fa-icon icon="arrow-left"></fa-icon></button>
+                <input (focus)="onSearchInputFocused()" (keyup)="searchUsers($event)" autocomplete="off" type="text" id="search" placeholder="search user" name="search">
+            </div>
+        </form>
+        <div class="chats-list-container">
+            <ul class="list-group" *ngIf="!isInputFocused">
+                <ng-container *ngFor="let room of rooms; let i=index">
+                    <li class="list-group-item" [ngClass]="selectedRecipient?.login==getRoomRecipient(room)?'active':''" (click)="getRecipientChat(getRoomRecipient(room))">
+                        {{ getRoomRecipient(room) }}
+                    </li>
+                </ng-container>
+            </ul>
+            <ul class="list-group" *ngIf="isInputFocused">
+                <ng-container *ngFor="let user of users; let i=index">
+                    <li class="list-group-item" (click)="getRecipientChat(user.login!);leaveSearch();getRooms();">
+                        {{ user.login }}
+                    </li>
+                </ng-container>
             </ul>
         </div>
     </div>
 
-    <div class="chat-area">
-        <div class="recipient-header" *ngIf="selectedRecipient"> 
+    <div class="chat-area" *ngIf="selectedRecipient">
+        <div class="recipient-header"> 
             <p> {{ selectedRecipient.login }} </p> 
-            <small><span [ngClass]=" selectedRecipient.isOnline ? 'text-light': 'text-danger'"><fa-icon icon="circle" size="xs"></fa-icon></span> {{ selectedRecipient.isOnline ? 'online':'offline' }}</small>
+            <small><span [ngClass]="selectedRecipient.isOnline ? 'text-light': 'text-danger'"><fa-icon icon="circle" size="xs"></fa-icon></span> {{ selectedRecipient.isOnline ? 'online':'offline' }}</small>
         </div>
         <div class="chat-area p-2" id="chat-messages" #chatMessages>
             <ng-container *ngFor="let groupedMessage of groupedMessages; let i=index">
@@ -32,12 +47,16 @@
                 </ng-container>
             </ng-container>
         </div>
-
-        <form id="messageForm" name="messageForm">
-            <div class="message-input">
+        <form id="messageForm" name="messageForm" >
+            <div class="message-input p-2">
                 <input autocomplete="off" type="text" id="message" placeholder="Type your message..." name="content"  [(ngModel)]="messageForm!.content">
-                <button type="button" (click)="sendMessage()">Send</button>
+                <button class="btn btn-link text-light" type="submit" (click)="sendMessage()" [disabled]="!messageForm.content"><fa-icon icon="angle-right" size="2xl"></fa-icon></button>
             </div>
         </form>
+    </div>
+    <div class="chat-area" *ngIf="!selectedRecipient">
+        <div class="text-center my-auto text-info">
+            <h1><b>Start chat</b></h1>
+          </div>
     </div>
 </div>

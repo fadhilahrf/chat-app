@@ -41,6 +41,8 @@ public class Message extends AbstractAuditingEntity<String> {
 
     private Instant deliveryTime = Instant.now();
 
+    private Boolean read;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
     public String getId() {
@@ -114,6 +116,14 @@ public class Message extends AbstractAuditingEntity<String> {
 
     public void setDeliveryTime(Instant deliveryTime) {
         this.deliveryTime = deliveryTime;
+    }
+
+    public Boolean getRead() {
+        return read;
+    }
+
+    public void setRead(Boolean read) {
+        this.read = read;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

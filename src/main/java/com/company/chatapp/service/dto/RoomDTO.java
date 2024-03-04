@@ -2,7 +2,10 @@ package com.company.chatapp.service.dto;
 
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Objects;
+
+import com.company.chatapp.domain.Room;
 
 /**
  * A DTO for the {@link com.company.chatapp.domain.Room} entity.
@@ -18,9 +21,19 @@ public class RoomDTO implements Serializable {
     @NotNull
     private String user2;
 
-    private Boolean deleted1;
+    private String deletedBy;
 
-    private Boolean deleted2;
+    private Instant latestMessageTime;
+
+    public RoomDTO() {}
+
+    public RoomDTO(Room room) {
+        this.id = room.getId();
+        this.user1 = room.getUser1();
+        this.user2 = room.getUser2();
+        this.deletedBy = room.getDeletedBy();
+        this.latestMessageTime = room.getLatestMessageTime();
+    }
 
     public String getId() {
         return id;
@@ -46,20 +59,16 @@ public class RoomDTO implements Serializable {
         this.user2 = user2;
     }
 
-    public Boolean getDeleted1() {
-        return deleted1;
+    public String getDeletedBy() {
+        return this.deletedBy;
     }
 
-    public void setDeleted1(Boolean deleted1) {
-        this.deleted1 = deleted1;
+    public Instant getLatestMessageTime() {
+        return latestMessageTime;
     }
 
-    public Boolean getDeleted2() {
-        return deleted2;
-    }
-
-    public void setDeleted2(Boolean deleted2) {
-        this.deleted2 = deleted2;
+    public void setLatestMessageTime(Instant latestMessageTime) {
+        this.latestMessageTime = latestMessageTime;
     }
 
     @Override
@@ -90,8 +99,7 @@ public class RoomDTO implements Serializable {
             "id='" + getId() + "'" +
             ", user1='" + getUser1() + "'" +
             ", user2='" + getUser2() + "'" +
-            ", deleted1='" + getDeleted1() + "'" +
-            ", deleted2='" + getDeleted2() + "'" +
+            ", deletedBy='" + getDeletedBy() + "'" +
             "}";
     }
 }

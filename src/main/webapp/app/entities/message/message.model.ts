@@ -8,6 +8,7 @@ export interface IMessage {
   content?: string | null;
   room?: Pick<IRoom, 'id'> | null;
   deliveryTime?: dayjs.Dayjs | null;
+  read?: boolean | null;
 }
 
 export interface IGroupedMessage  { 

@@ -37,6 +37,14 @@ export class RoomService {
     return this.http.get<IRoom>(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
 
+  getAllByCurrentUser(): Observable<EntityArrayResponseType> {
+    return this.http.get<IRoom[]>(`${this.resourceUrl}/user`, { observe: 'response' });
+  }
+
+  getAllRoomsForUserSortedByLatestMessageTime(): Observable<EntityArrayResponseType> {
+    return this.http.get<IRoom[]>(`${this.resourceUrl}/user/latest-message`, { observe: 'response' });
+  }
+
   query(req?: any): Observable<EntityArrayResponseType> {
     const options = createRequestOption(req);
     return this.http.get<IRoom[]>(this.resourceUrl, { params: options, observe: 'response' });

@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 /**
@@ -96,11 +97,29 @@ public class RoomService {
         return roomRepository.findAllByCurrentUser(currentUser).stream().map(roomMapper::toDto).toList();
     }
 
+    public List<RoomDTO> findAllByCurrentUserSortedByLatestMessageTime(String currentUser) {
+        log.debug("Request to get all Rooms sorted by latest message time by user");
+        Sort sort = Sort.by(Sort.Direction.DESC, "latestMessageTime");
+        return roomRepository.findAllByCurrentUserSortedBy(currentUser, sort).stream().map(roomMapper::toDto).toList();
+    }
+
     public List<RoomDTO> findAllByCurrentUser() {
         try {
             String username = SecurityUtils.getCurrentUserLogin().orElseThrow(()-> new NotFoundException("Username not found"));
 
             return findAllByCurrentUser(username);
+        } catch( Exception e ) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
+
+    public List<RoomDTO> findAllByCurrentUserSortedByLatestMessageTime() {
+        try {
+            String username = SecurityUtils.getCurrentUserLogin().orElseThrow(()-> new NotFoundException("Username not found"));
+
+            return findAllByCurrentUserSortedByLatestMessageTime(username);
         } catch( Exception e ) {
             e.printStackTrace();
         }

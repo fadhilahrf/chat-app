@@ -8,6 +8,8 @@ import { Account } from 'app/core/auth/account.model';
 import { IGroupedMessage, IMessage, NewMessage } from 'app/entities/message/message.model';
 import { MessageService } from 'app/entities/message/service/message.service';
 import dayjs from 'dayjs/esm';
+import { IRoom } from 'app/entities/room/room.model';
+import { RoomService } from 'app/entities/room/service/room.service';
 
 @Component({
   selector: 'jhi-chat',
@@ -17,7 +19,7 @@ import dayjs from 'dayjs/esm';
   styleUrl: './chat.component.scss',
 })
 export class ChatComponent implements OnInit {
-  @ViewChild('chatMessages') private chatMessages?: ElementRef<HTMLElement>;
+  @ViewChild('chatMessages', { static: false }) private chatMessages?: ElementRef<HTMLElement>;
 
   ctx = '';
 
@@ -27,31 +29,47 @@ export class ChatComponent implements OnInit {
 
   messages: IMessage[] = [];
 
+  rooms: IRoom[] = [];
+
   groupedMessages: IGroupedMessage[] = [];
 
   messageForm: NewMessage = { id: null };
  
   selectedRecipient: IUser | null = null;
 
-  constructor(private userService: UserService, private accountService: AccountService, private messageService: MessageService, private stompService: StompService) {}
+  isInputFocused: boolean = false;
+
+  constructor(private userService: UserService, private accountService: AccountService, private roomService: RoomService, private messageService: MessageService, private stompService: StompService) {}
 
   ngOnInit(): void {
     this.accountService.getAuthenticationState().subscribe(account => {
       this.account = account;
-      this.getUsers();
+      this.getRooms();
     });
 
     this.stompService.connect({}, ()=>{
-      this.stompService.getStomp().subscribe('/topic/public', (user)=>{
-        this.getUsers();
+      this.stompService.getStomp().subscribe('/topic/public/connection', (payload)=>{
+        try {
+          if(JSON.parse(payload.body)) {
+            const user: IUser = JSON.parse(payload.body);
+            if(user?.login! == this.selectedRecipient?.login) {
+              this.selectedRecipient = user;
+            }
+          }
+      } catch (error) {
+          if (error instanceof TypeError) {
+              console.error("Caught a TypeError:", error.message);
+          } else {
+              throw error;
+          }
+      }
       });
 
-      this.stompService.getStomp().subscribe(`/user/${this.account!.login}/notification/messages`, (message: any)=>{
-        this.openChat(this.selectedRecipient!, false);
+      this.stompService.getStomp().subscribe(`/user/${this.account!.login}/notification/messages`, (payload)=>{
+        this.getMessages(this.selectedRecipient!, false);
+        this.getRooms();
       });
     }, ()=>{console.log("error")})
-
-
   }
 
   getUsers(): void{
@@ -62,7 +80,38 @@ export class ChatComponent implements OnInit {
     })
   }
 
-  openChat(recipient: IUser, firstInit: boolean): void {
+  searchUsers(event: any): void {
+    const search = event.target.value;
+    if(search!='') {
+      this.userService.getAll(search).subscribe(res=>{
+        if(res.body) {
+          this.users = res.body.filter(user=>user.login!=this.account?.login);
+        }
+      })
+    }else {
+      this.users = [];
+    }
+
+  }
+
+  getRecipientChat(login: string): void {
+    this.userService.getByLogin(login).subscribe(res=>{
+      if(res.body) {
+        this.selectedRecipient = res.body;
+        this.getMessages(this.selectedRecipient, true);
+      }
+    })
+  }
+
+  getRooms(): void {
+    this.roomService.getAllRoomsForUserSortedByLatestMessageTime().subscribe(res=>{
+      if(res.body) {
+        this.rooms = res.body;
+      }
+    })
+  }
+
+  getMessages(recipient: IUser, firstInit: boolean): void {
     this.selectedRecipient = recipient;
     if(this.selectedRecipient) {
       this.messageService.getAllByRecipient(this.selectedRecipient.login!).subscribe(res=>{
@@ -95,7 +144,8 @@ export class ChatComponent implements OnInit {
       this.messageForm.recipient = this.selectedRecipient.login;
       this.stompService.send('/app/message', {}, JSON.stringify(this.messageForm));
       this.messageForm.content = null;
-      this.openChat(this.selectedRecipient, true);
+      this.getMessages(this.selectedRecipient, true);
+      this.getRooms();
     }
   }
 
@@ -111,7 +161,20 @@ export class ChatComponent implements OnInit {
     return dateTime.format('D MMMM YYYY');
   }
 
+  getRoomRecipient(room: IRoom): string {
+    return room.user1!=this.account?.login ? room.user1! : room.user2!;
+  }
+
   scrollToBottom(): void {
     this.chatMessages!.nativeElement.scrollTop =  this.chatMessages!.nativeElement.scrollHeight;
+  }
+
+  onSearchInputFocused(): void {
+    this.isInputFocused = true;
+  }
+
+  leaveSearch(): void {
+    this.isInputFocused = false;
+    (document.getElementById('search') as HTMLInputElement).value = ''
   }
 }

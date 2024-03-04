@@ -2,8 +2,11 @@ package com.company.chatapp.web.rest;
 
 import com.company.chatapp.service.UserService;
 import com.company.chatapp.service.dto.UserDTO;
+
+import io.micrometer.common.util.StringUtils;
+
 import java.util.*;
-import java.util.Collections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -17,6 +20,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.PaginationUtil;
+import tech.jhipster.web.util.ResponseUtil;
 
 @RestController
 @RequestMapping("/api")
@@ -40,6 +44,15 @@ public class PublicUserResource {
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body all users.
      */
+
+    @GetMapping("/users/{login}")
+    public ResponseEntity<UserDTO> getPublicUser(@PathVariable("login") String login) {
+        log.debug("REST request to get public User");
+        Optional<UserDTO> userOptional = userService.findOneByLogin(login);
+        return ResponseUtil.wrapOrNotFound(userOptional);
+    }
+ 
+
     @GetMapping("/users")
     public ResponseEntity<List<UserDTO>> getAllPublicUsers(@org.springdoc.core.annotations.ParameterObject Pageable pageable) {
         log.debug("REST request to get all public User names");
@@ -57,10 +70,16 @@ public class PublicUserResource {
     }
 
     @GetMapping("/users/all")
-    public ResponseEntity<List<UserDTO>> getAllPublicUsers() {
+    public ResponseEntity<List<UserDTO>> getAllPublicUsers(@RequestParam(value = "search", required = false) String search) {
         log.debug("REST request to get all public User names");
 
-        List<UserDTO> users = userService.getAllPublicUsers();
+        List<UserDTO> users;
+
+        if(StringUtils.isBlank(search)) {
+            users = userService.getAllPublicUsers();
+        }else {
+            users = userService.getAllByLoginLike(search);
+        }
         
         return ResponseEntity.ok(users);
     }
@@ -75,13 +94,13 @@ public class PublicUserResource {
     }
 
     @MessageMapping("/user.connect")
-    @SendTo("/topic/public")
+    @SendTo("/topic/public/connection")
     public UserDTO connectUser(UserDTO userDTO) {
         return new UserDTO(userService.setCurrentUserOnlineStatus(userDTO.getLogin(), true));
     }
 
     @MessageMapping("/user.disconnect")
-    @SendTo("/topic/public")
+    @SendTo("/topic/public/connection")
     public UserDTO disconnectUser(UserDTO userDTO) {
         return new UserDTO(userService.setCurrentUserOnlineStatus(userDTO.getLogin(), false));
     }

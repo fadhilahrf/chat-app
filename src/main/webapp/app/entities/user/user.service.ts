@@ -22,8 +22,12 @@ export class UserService {
     return this.http.get<IUser[]>(this.resourceUrl, { params: options, observe: 'response' });
   }
 
-  getAll(): Observable<HttpResponse<IUser[]>> {
-    return this.http.get<IUser[]>(`${this.resourceUrl}/all`, { observe: 'response' });
+  getAll(search?: string): Observable<HttpResponse<IUser[]>> {
+    return this.http.get<IUser[]>(`${this.resourceUrl}/all${search? '?search='+search:''}`, { observe: 'response' });
+  }
+
+  getByLogin(login: string): Observable<HttpResponse<IUser>> {
+    return this.http.get<IUser>(`${this.resourceUrl}/${login}`, { observe: 'response' });
   }
 
   compareUser(o1: Pick<IUser, 'id'> | null, o2: Pick<IUser, 'id'> | null): boolean {

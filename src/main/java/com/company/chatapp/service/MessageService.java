@@ -5,10 +5,12 @@ import com.company.chatapp.domain.Room;
 import com.company.chatapp.repository.MessageRepository;
 import com.company.chatapp.security.SecurityUtils;
 import com.company.chatapp.service.dto.MessageDTO;
+import com.company.chatapp.service.dto.RoomDTO;
 import com.company.chatapp.service.mapper.MessageMapper;
 
 import javassist.NotFoundException;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -46,7 +48,9 @@ public class MessageService {
     public MessageDTO save(MessageDTO messageDTO)  {
         log.debug("Request to save Message : {}", messageDTO);
         Message message = messageMapper.toEntity(messageDTO);
-        Room room = this.roomService.findOrCreate(messageDTO.getSender(), messageDTO.getRecipient());
+        Room room = roomService.findOrCreate(messageDTO.getSender(), messageDTO.getRecipient());
+        room.setLatestMessageTime(Instant.now());
+        roomService.save(new RoomDTO(room));
         message.setRoom(room);
         
         message = messageRepository.save(message);

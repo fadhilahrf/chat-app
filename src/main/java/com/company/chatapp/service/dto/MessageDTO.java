@@ -26,6 +26,8 @@ public class MessageDTO implements Serializable {
 
     private Instant deliveryTime = Instant.now();
 
+    private Boolean read;
+
     public String getId() {
         return id;
     }
@@ -72,6 +74,14 @@ public class MessageDTO implements Serializable {
 
     public void setDeliveryTime(Instant deliveryTime) {
         this.deliveryTime = deliveryTime;
+    }
+
+    public Boolean getRead() {
+        return read;
+    }
+
+    public void setRead(Boolean read) {
+        this.read = read;
     }
 
     @Override
