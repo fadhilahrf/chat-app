@@ -26,7 +26,7 @@ public class MessageDTO implements Serializable {
 
     private Instant deliveryTime = Instant.now();
 
-    private Boolean read;
+    private Boolean read = false;
 
     public String getId() {
         return id;

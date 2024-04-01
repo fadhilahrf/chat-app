@@ -41,7 +41,7 @@ public class Message extends AbstractAuditingEntity<String> {
 
     private Instant deliveryTime = Instant.now();
 
-    private Boolean read;
+    private Boolean read = false;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 

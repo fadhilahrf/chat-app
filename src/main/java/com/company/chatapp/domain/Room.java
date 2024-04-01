@@ -33,6 +33,12 @@ public class Room extends AbstractAuditingEntity<String> {
 
     private Instant latestMessageTime;
 
+    private Integer unreadMessagesNumber1 = 0;
+    
+    private Integer unreadMessagesNumber2 = 0;
+
+    private Message latestMessage;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
     public String getId() {
@@ -93,6 +99,30 @@ public class Room extends AbstractAuditingEntity<String> {
 
     public void setLatestMessageTime(Instant latestMessageTime) {
         this.latestMessageTime = latestMessageTime;
+    }
+
+    public Integer getUnreadMessagesNumber1() {
+        return unreadMessagesNumber1;
+    }
+
+    public void setUnreadMessagesNumber1(Integer unreadMessagesNumber1) {
+        this.unreadMessagesNumber1 = unreadMessagesNumber1;
+    }
+
+    public Integer getUnreadMessagesNumber2() {
+        return unreadMessagesNumber2;
+    }
+
+    public void setUnreadMessagesNumber2(Integer unreadMessagesNumber2) {
+        this.unreadMessagesNumber2 = unreadMessagesNumber2;
+    }
+
+    public Message getLatestMessage() {
+        return latestMessage;
+    }
+
+    public void setLatestMessage(Message latestMessage) {
+        this.latestMessage = latestMessage;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

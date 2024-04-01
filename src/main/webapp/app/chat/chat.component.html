@@ -12,8 +12,9 @@
         <div class="chats-list-container">
             <ul class="list-group" *ngIf="!isInputFocused">
                 <ng-container *ngFor="let room of rooms; let i=index">
-                    <li class="list-group-item" [ngClass]="selectedRecipient?.login==getRoomRecipient(room)?'active':''" (click)="getRecipientChat(getRoomRecipient(room))">
-                        {{ getRoomRecipient(room) }}
+                    <li class="list-group-item" [ngClass]="selectedRecipient?.login==getRoomRecipient(room)?'active':''" (click)="getRecipientChat(getRoomRecipient(room));">
+                        <div class="user">{{ getRoomRecipient(room) }} <span *ngIf="getUnreadMessagesNumber(room)" class="text-warning"> {{ getUnreadMessagesNumber(room) }} </span></div>
+                        <small class="message-overview"><span *ngIf="room.latestMessage?.read && account?.login==room.latestMessage?.sender" class="text-warning"><fa-icon icon="check" size="lg"></fa-icon>&nbsp;</span>{{ room.latestMessage?.content }} </small>
                     </li>
                 </ng-container>
             </ul>
@@ -40,9 +41,9 @@
                     </span>
                 </div>
                 <ng-container *ngFor="let message of groupedMessage.messages; let i=index">
-                    <div class="message-box" [ngClass]="message.sender==account!.login ? 'sender':'receiver'">
+                    <div id="{{ message.id }}" class="message-box" [ngClass]="message.sender==account!.login ? 'sender':'receiver'">
                         <p> {{ message.content }} </p>
-                        <small class="delivery-time"> {{ getTime(message.deliveryTime!.toString()) }} </small>
+                        <span class="delivery-time"><span class="text-warning" *ngIf="message.read && message.sender==account?.login"><fa-icon icon="check" size="lg"></fa-icon></span>  &nbsp; {{ getTime(message.deliveryTime!.toString()) }}</span>
                     </div>
                 </ng-container>
             </ng-container>

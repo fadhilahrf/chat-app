@@ -11,6 +11,7 @@ import com.company.chatapp.service.mapper.MessageMapper;
 import javassist.NotFoundException;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -50,6 +51,20 @@ public class MessageService {
         Message message = messageMapper.toEntity(messageDTO);
         Room room = roomService.findOrCreate(messageDTO.getSender(), messageDTO.getRecipient());
         room.setLatestMessageTime(Instant.now());
+        if(messageDTO.getRead()){
+            if(messageDTO.getRecipient().equals(room.getUser1()) && room.getUnreadMessagesNumber1()>0) {
+                room.setUnreadMessagesNumber1(room.getUnreadMessagesNumber1()-1);
+            }else if(messageDTO.getRecipient().equals(room.getUser2()) && room.getUnreadMessagesNumber2()>0) {
+                room.setUnreadMessagesNumber2(room.getUnreadMessagesNumber2()-1);
+            }
+        }else {
+            if(messageDTO.getRecipient().equals(room.getUser1())) {
+                room.setUnreadMessagesNumber1(room.getUnreadMessagesNumber1()+1);
+            }else{
+                room.setUnreadMessagesNumber2(room.getUnreadMessagesNumber2()+1);
+            }
+        }
+        room.setLatestMessage(message);
         roomService.save(new RoomDTO(room));
         message.setRoom(room);
         
@@ -103,8 +118,13 @@ public class MessageService {
 
     public List<MessageDTO> findAllBySenderAndRecipient(String user1, String user2) {
         log.debug("findAllBySenderAndRecipient: {} {}", user1, user2);
-        Room room = this.roomService.findOrCreate(user1, user2);
-        return messageRepository.findAllByRoom(room).stream().map(messageMapper::toDto).toList();
+        Optional<Room> roomOptional = roomService.findByUser1AndUser2(user1, user2);
+        if(roomOptional.isPresent()){
+            Room room = roomOptional.get();
+            return messageRepository.findAllByRoom(room).stream().map(messageMapper::toDto).toList();
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     public List<MessageDTO> findAllBySenderAndRecipient(String recipient) {

@@ -41,17 +41,14 @@ export default class MainComponent implements OnInit {
           this.stompService.send('/app/user.connect', {}, JSON.stringify(this.user));
         }
       });
+      this.isRefreshing = true;
   }
 
   @HostListener('window:beforeunload', ['$event'])
   onBeforeUnload(event: Event): void {
-    this.isRefreshing = true;
-  }
-
-  @HostListener('window:unload', ['$event'])
-  disconnectUser(event: Event): void {
     if(this.user && !this.isRefreshing) {
       this.stompService.send('/app/user.disconnect', {}, JSON.stringify(this.user));
     }
+    this.isRefreshing = false;
   }
 }

@@ -25,6 +25,12 @@ public class RoomDTO implements Serializable {
 
     private Instant latestMessageTime;
 
+    private Integer unreadMessagesNumber1 = 0;
+    
+    private Integer unreadMessagesNumber2 = 0;
+
+    private MessageDTO latestMessage;
+
     public RoomDTO() {}
 
     public RoomDTO(Room room) {
@@ -33,6 +39,15 @@ public class RoomDTO implements Serializable {
         this.user2 = room.getUser2();
         this.deletedBy = room.getDeletedBy();
         this.latestMessageTime = room.getLatestMessageTime();
+        this.unreadMessagesNumber1 = room.getUnreadMessagesNumber1();
+        this.unreadMessagesNumber2 = room.getUnreadMessagesNumber2();
+        this.latestMessage = new MessageDTO();
+        this.latestMessage.setId(room.getLatestMessage().getId());
+        this.latestMessage.setSender(room.getLatestMessage().getSender());
+        this.latestMessage.setRecipient(room.getLatestMessage().getRecipient());
+        this.latestMessage.setContent(room.getLatestMessage().getContent());
+        this.latestMessage.setRead(room.getLatestMessage().getRead());
+        this.latestMessage.setDeliveryTime(room.getLatestMessage().getDeliveryTime());
     }
 
     public String getId() {
@@ -69,6 +84,30 @@ public class RoomDTO implements Serializable {
 
     public void setLatestMessageTime(Instant latestMessageTime) {
         this.latestMessageTime = latestMessageTime;
+    }
+
+    public Integer getUnreadMessagesNumber1() {
+        return unreadMessagesNumber1;
+    }
+
+    public void setUnreadMessagesNumber1(Integer unreadMessagesNumber1) {
+        this.unreadMessagesNumber1 = unreadMessagesNumber1;
+    }
+
+    public Integer getUnreadMessagesNumber2() {
+        return unreadMessagesNumber2;
+    }
+
+    public void setUnreadMessagesNumber2(Integer unreadMessagesNumber2) {
+        this.unreadMessagesNumber2 = unreadMessagesNumber2;
+    }
+
+    public MessageDTO getLatestMessage() {
+        return latestMessage;
+    }
+
+    public void setLatestMessage(MessageDTO latestMessage) {
+        this.latestMessage = latestMessage;
     }
 
     @Override

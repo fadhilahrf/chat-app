@@ -138,7 +138,13 @@ public class RoomService {
         return roomRepository.findById(id).map(roomMapper::toDto);
     }
 
+    public Optional<Room> findByUser1AndUser2(String user1, String user2) {
+        log.debug("Request to get Room By user1 and user2 : {} and {}", user1, user2);
+        return roomRepository.findOneByUser1AndUser2(user1, user2);
+    }
+
     public Room findOrCreate(String user1, String user2) {
+        log.debug("Request to get or create Room By user1 and user2 : {} and {}", user1, user2);
         Optional<Room> optionalRoom = roomRepository.findOneByUser1AndUser2(user1, user2);
         Room room = null;
         if(optionalRoom.isPresent()) {

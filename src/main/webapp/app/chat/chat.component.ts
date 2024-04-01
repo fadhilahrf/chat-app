@@ -39,6 +39,10 @@ export class ChatComponent implements OnInit {
 
   isInputFocused: boolean = false;
 
+  newMessageHeight = 0;
+
+  firstUnreadMessageId = '';
+
   constructor(private userService: UserService, private accountService: AccountService, private roomService: RoomService, private messageService: MessageService, private stompService: StompService) {}
 
   ngOnInit(): void {
@@ -69,6 +73,30 @@ export class ChatComponent implements OnInit {
         this.getMessages(this.selectedRecipient!, false);
         this.getRooms();
       });
+
+      this.stompService.getStomp().subscribe(`/user/${this.account!.login}/messages/read`, (payload)=>{
+        try {
+          if(JSON.parse(payload.body)) {
+            const messages: IMessage[] = JSON.parse(payload.body);
+            
+            messages.forEach(message=>{
+              this.groupedMessages.forEach(groupedMessage=>{
+                groupedMessage.messages.forEach(m=>{
+                    if(m.id==message.id) {
+                      m.read = message.read;
+                    }
+                })
+              });
+            });
+          }
+      } catch (error) {
+          if (error instanceof TypeError) {
+              console.error("Caught a TypeError:", error.message);
+          } else {
+              throw error;
+          }
+      }
+      });
     }, ()=>{console.log("error")})
   }
 
@@ -91,13 +119,13 @@ export class ChatComponent implements OnInit {
     }else {
       this.users = [];
     }
-
   }
 
   getRecipientChat(login: string): void {
     this.userService.getByLogin(login).subscribe(res=>{
       if(res.body) {
         this.selectedRecipient = res.body;
+        this.newMessageHeight = 0;
         this.getMessages(this.selectedRecipient, true);
       }
     })
@@ -119,14 +147,31 @@ export class ChatComponent implements OnInit {
           this.messages = res.body;
           this.groupedMessages = [];
           const distinctDate = new Set(this.messages.map(m=>this.getDate(m.deliveryTime!.toString())));
+          const unreadMessages: IMessage[] = [];
+          let isFirstUnreadMessage = true; 
           distinctDate.forEach(d=>{
               const groupedMessage: IGroupedMessage = {
                 date: d,
-                messages: this.messages.filter(m=>this.getDate(m.deliveryTime!.toString())==d)
+                messages: this.messages.filter(m=>this.getDate(m.deliveryTime!.toString())==d).map(m=>{
+                    if(!m.read && this.account?.login == m.recipient) {
+                      if(isFirstUnreadMessage) {
+                        this.firstUnreadMessageId = m.id;
+                        isFirstUnreadMessage = false;
+                      }
+                      m.read = true;
+                      this.newMessageHeight+=50;
+                      unreadMessages.push(m);
+                    }
+                  
+                  return m;
+                })
               }
-
+              this.stompService.send(`/app/${this.selectedRecipient?.login}/messages/read`, {}, JSON.stringify(unreadMessages));
               this.groupedMessages.push(groupedMessage);
-
+              setTimeout(()=>{
+                this.getRooms();
+              }, 100);
+              
               if(firstInit) {
                 setTimeout(()=>{
                   this.scrollToBottom();
@@ -142,6 +187,7 @@ export class ChatComponent implements OnInit {
     if (this.messageForm.content && this.selectedRecipient) {
       this.messageForm.sender = this.account!.login;
       this.messageForm.recipient = this.selectedRecipient.login;
+      this.messageForm.read = false;
       this.stompService.send('/app/message', {}, JSON.stringify(this.messageForm));
       this.messageForm.content = null;
       this.getMessages(this.selectedRecipient, true);
@@ -166,7 +212,12 @@ export class ChatComponent implements OnInit {
   }
 
   scrollToBottom(): void {
-    this.chatMessages!.nativeElement.scrollTop =  this.chatMessages!.nativeElement.scrollHeight;
+    if(this.firstUnreadMessageId) {
+      const targetElement = <HTMLElement> document.getElementById(this.firstUnreadMessageId);
+      this.chatMessages!.nativeElement.scrollTop = targetElement.offsetTop-150;
+    }else {
+    this.chatMessages!.nativeElement.scrollTop = this.chatMessages!.nativeElement.scrollHeight;
+    }
   }
 
   onSearchInputFocused(): void {
@@ -176,5 +227,13 @@ export class ChatComponent implements OnInit {
   leaveSearch(): void {
     this.isInputFocused = false;
     (document.getElementById('search') as HTMLInputElement).value = ''
+  }
+
+  getUnreadMessagesNumber(room: IRoom): number | null | undefined {
+      if(this.account?.login==room.user1) {
+        return room.unreadMessagesNumber1;
+      }else {
+        return room.unreadMessagesNumber2;
+      }
   }
 }

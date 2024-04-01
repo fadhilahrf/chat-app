@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -193,6 +194,27 @@ public class MessageResource {
         messagingTemplate.convertAndSendToUser(
                 messageDTO.getRecipient(), "/notification/messages",
                 messageDTO
+        );
+    }
+
+    @MessageMapping("/message/read")
+    public void readMessage(@Payload MessageDTO messageDTO) {
+        messageDTO = messageService.save(messageDTO);
+        messagingTemplate.convertAndSendToUser(
+                messageDTO.getSender(), "/message/read",
+                messageDTO
+        );
+    }
+
+    @MessageMapping("/{sender}/messages/read")
+    public void readMessages(@DestinationVariable String sender, @Payload MessageDTO[] messageDTOs) {
+        for(MessageDTO messageDTO: messageDTOs) {
+            messageDTO = messageService.save(messageDTO);
+        }
+
+        messagingTemplate.convertAndSendToUser(
+                sender, "/messages/read",
+                messageDTOs
         );
     }
 
