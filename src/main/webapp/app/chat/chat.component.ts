@@ -10,6 +10,8 @@ import { MessageService } from 'app/entities/message/service/message.service';
 import dayjs from 'dayjs/esm';
 import { IRoom } from 'app/entities/room/room.model';
 import { RoomService } from 'app/entities/room/service/room.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { MessageDeleteDialogComponent } from './dialogs/message-delete-dialog/message-delete-dialog.component';
 
 @Component({
   selector: 'jhi-chat',
@@ -43,7 +45,16 @@ export class ChatComponent implements OnInit {
 
   firstUnreadMessageId = '';
 
-  constructor(private userService: UserService, private accountService: AccountService, private roomService: RoomService, private messageService: MessageService, private stompService: StompService) {}
+  $primary = '#0dcaf0';
+
+  $info = '#0d6efd';
+
+  constructor(private userService: UserService, 
+    private accountService: AccountService, 
+    private roomService: RoomService, 
+    private messageService: MessageService, 
+    private stompService: StompService, 
+    private modalService: NgbModal) {}
 
   ngOnInit(): void {
     this.accountService.getAuthenticationState().subscribe(account => {
@@ -87,6 +98,28 @@ export class ChatComponent implements OnInit {
                     }
                 })
               });
+            });
+          }
+      } catch (error) {
+          if (error instanceof TypeError) {
+              console.error("Caught a TypeError:", error.message);
+          } else {
+              throw error;
+          }
+      }
+      });
+
+      this.stompService.getStomp().subscribe(`/user/${this.account!.login}/messages/deleted`, (payload)=>{
+        try {
+          if(JSON.parse(payload.body)) {
+            const message: IMessage = JSON.parse(payload.body);
+            
+            this.groupedMessages.forEach(groupedMessage=>{
+              groupedMessage.messages.forEach(m=>{
+                  if(m.id==message.id) {
+                    m.isDeleted = message.isDeleted;
+                  }
+              })
             });
           }
       } catch (error) {
@@ -235,5 +268,23 @@ export class ChatComponent implements OnInit {
       }else {
         return room.unreadMessagesNumber2;
       }
+  }
+
+  delete(message: IMessage, isForAll: boolean): void {
+    const modalRef = this.modalService.open(MessageDeleteDialogComponent, { size: 'md', centered: true });
+    modalRef.componentInstance.message = message;
+    modalRef.componentInstance.isForAll = isForAll;
+
+    modalRef.closed.subscribe(state=>{
+      if(isForAll){
+        this.stompService.send(`/app/message/delete/${message.id}/all-users`, {}, JSON.stringify({}));
+      }else {
+        this.stompService.send(`/app/message/delete/${message.id}/user/${this.account!.login}`, {}, JSON.stringify({}));
+      }
+    })
+  }
+
+  countNotDeletedMessages(messages: IMessage[]): number {
+    return messages.filter(m=>!m.isDeleted).length;
   }
 }

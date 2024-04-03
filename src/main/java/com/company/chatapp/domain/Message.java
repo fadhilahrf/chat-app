@@ -43,6 +43,8 @@ public class Message extends AbstractAuditingEntity<String> {
 
     private Boolean read = false;
 
+    private String deletedBy="";
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
     public String getId() {
@@ -124,6 +126,14 @@ public class Message extends AbstractAuditingEntity<String> {
 
     public void setRead(Boolean read) {
         this.read = read;
+    }
+
+    public String getDeletedBy() {
+        return deletedBy;
+    }
+
+    public void setDeletedBy(String deletedBy) {
+        this.deletedBy = deletedBy;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

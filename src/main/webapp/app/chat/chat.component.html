@@ -35,16 +35,45 @@
         </div>
         <div class="chat-area p-2" id="chat-messages" #chatMessages>
             <ng-container *ngFor="let groupedMessage of groupedMessages; let i=index">
-                <div  class="separator">
-                    <span class="date">
-                        {{ groupedMessage.date }}
-                    </span>
-                </div>
-                <ng-container *ngFor="let message of groupedMessage.messages; let i=index">
-                    <div id="{{ message.id }}" class="message-box" [ngClass]="message.sender==account!.login ? 'sender':'receiver'">
-                        <p> {{ message.content }} </p>
-                        <span class="delivery-time"><span class="text-warning" *ngIf="message.read && message.sender==account?.login"><fa-icon icon="check" size="lg"></fa-icon></span>  &nbsp; {{ getTime(message.deliveryTime!.toString()) }}</span>
+                <ng-container *ngIf="countNotDeletedMessages(groupedMessage.messages)>0">
+                    <div class="separator">
+                        <span class="date">
+                            {{ groupedMessage.date }}
+                        </span>
                     </div>
+                    <ng-container *ngFor="let message of groupedMessage.messages; let i=index">
+                        <div *ngIf="!message.isDeleted" id="{{ message.id }}" class="message-box" [ngClass]="message.sender==account!.login ? 'sender':'receiver'">
+                            <div
+                                ngbDropdown
+                                class="dropdown d-flex justify-content-end"
+                                display="dynamic"
+                            >
+                                <a class="nav-link dropdown-toggle message-toggle" style="--messageColor: {{ message.sender==account!.login ? $info : $primary }}" ngbDropdownToggle href="javascript:void(0);" [id]="message.id+'-menu'">
+                                    <fa-icon icon="angle-down"></fa-icon>
+                                </a>
+                                <ul class="dropdown-menu" ngbDropdownMenu>
+                                    <li>
+                                        <a
+                                        class="dropdown-item"
+                                        (click)="delete(message, false)"
+                                        >
+                                        <span>Delete for me</span>
+                                        </a>
+                                    </li>
+                                    <li *ngIf="message.sender==account!.login">
+                                        <a
+                                        class="dropdown-item"
+                                        (click)="delete(message, true)"
+                                        >
+                                        <span>Delete for all</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <p> {{ message.content }} </p>
+                            <span class="delivery-time"><span class="text-warning" *ngIf="message.read && message.sender==account?.login"><fa-icon icon="check" size="lg"></fa-icon></span>  &nbsp; {{ getTime(message.deliveryTime!.toString()) }}</span>
+                        </div>
+                    </ng-container>
                 </ng-container>
             </ng-container>
         </div>

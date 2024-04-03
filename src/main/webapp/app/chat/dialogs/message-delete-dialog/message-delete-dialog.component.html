@@ -1,0 +1,21 @@
+@if (message) {
+  <div class="modal-header">
+    <h4 class="modal-title">Delete Message</h4>
+  </div>
+
+  <div class="modal-body">
+    <jhi-alert-error></jhi-alert-error>
+    <p class="delete-message-confirmation">{{ isForAll ? deleteMessageConfirmation.FOR_ALL : deleteMessageConfirmation.FOR_YOU }}</p>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="cancel()">
+      Cancel
+    </button>
+
+    <button type="submit" class="btn btn-danger" (click)="confirmDelete()">
+      Delete
+    </button>
+  </div>
+  }
+  

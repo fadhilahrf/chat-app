@@ -9,6 +9,7 @@ export interface IMessage {
   room?: Pick<IRoom, 'id'> | null;
   deliveryTime?: dayjs.Dayjs | null;
   read?: boolean | null;
+  isDeleted?: boolean | null;
 }
 
 export interface IGroupedMessage  { 

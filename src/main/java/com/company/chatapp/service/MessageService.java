@@ -12,8 +12,10 @@ import javassist.NotFoundException;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -121,7 +123,18 @@ public class MessageService {
         Optional<Room> roomOptional = roomService.findByUser1AndUser2(user1, user2);
         if(roomOptional.isPresent()){
             Room room = roomOptional.get();
-            return messageRepository.findAllByRoom(room).stream().map(messageMapper::toDto).toList();
+            return messageRepository.findAllByRoom(room).stream().map(message->{
+                MessageDTO messageDTO = messageMapper.toDto(message);
+                List<String> users = new ArrayList<>(Arrays.asList(message.getDeletedBy().split(";")));
+                
+                System.out.println("DELEETTED : "+users);
+
+                if(users.contains(user1)) {
+                   messageDTO.setContent(""); 
+                   messageDTO.setIsDeleted(true);
+                }
+                return messageDTO;
+            }).toList();
         } else {
             return new ArrayList<>();
         }
@@ -161,5 +174,40 @@ public class MessageService {
     public void delete(String id) {
         log.debug("Request to delete Message : {}", id);
         messageRepository.deleteById(id);
+    }
+
+    public Optional<MessageDTO> softDeleteByUser(String id, String username) {
+        Optional<Message> messageOptional = messageRepository.findById(id);
+        if(messageOptional.isPresent()) {
+            Message message = messageOptional.get();
+            
+            if(message.getSender().equals(username) || message.getRecipient().equals(username)) {
+                List<String> users = new ArrayList<>(Arrays.asList(message.getDeletedBy().split(" ;")));
+                if(!users.contains(username)) {
+                    users.add(username);
+                }
+                System.out.println("SOFT DELETE : "+users);
+                message.setDeletedBy(String.join(";", users.stream().filter(s -> !s.isEmpty()).toList()));
+                
+                return Optional.of(messageRepository.save(message)).map(messageMapper::toDto);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<MessageDTO> softDeleteByAllUser(String id) {
+        Optional<Message> messageOptional = messageRepository.findById(id);
+        if(messageOptional.isPresent()) {
+            Message message = messageOptional.get();
+
+            List<String> users = new ArrayList<>();
+            users.add(message.getSender());
+            users.add(message.getRecipient());
+
+            message.setDeletedBy(String.join(";", users.stream().filter(s -> !s.isEmpty()).toList()));
+            
+            return Optional.of(messageRepository.save(message)).map(messageMapper::toDto);
+        }
+        return Optional.empty();
     }
 }
