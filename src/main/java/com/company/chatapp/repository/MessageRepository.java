@@ -4,6 +4,7 @@ import com.company.chatapp.domain.Message;
 import com.company.chatapp.domain.Room;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
@@ -15,4 +16,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MessageRepository extends MongoRepository<Message, String> {
     public List<Message> findAllByRoom(Room room);
+
+    public Optional<Message> findFirstByRoomAndDeletedByNotContainingOrderByDeliveryTimeDesc(Room room, String deletedBy);
 }

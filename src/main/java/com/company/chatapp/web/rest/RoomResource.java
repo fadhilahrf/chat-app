@@ -18,6 +18,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -42,9 +45,12 @@ public class RoomResource {
 
     private final RoomRepository roomRepository;
 
-    public RoomResource(RoomService roomService, RoomRepository roomRepository) {
+    private final SimpMessagingTemplate messagingTemplate;
+
+    public RoomResource(RoomService roomService, RoomRepository roomRepository, SimpMessagingTemplate messagingTemplate) {
         this.roomService = roomService;
         this.roomRepository = roomRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     /**
@@ -189,5 +195,46 @@ public class RoomResource {
         log.debug("REST request to delete Room : {}", id);
         roomService.delete(id);
         return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id)).build();
+    }
+
+    @MessageMapping("/room/delete/{id}/user/{username}")
+    public void softDeleteForUser(@DestinationVariable("id") String id, @DestinationVariable("username") String username) {
+        log.debug("REST request to soft delete Room : {} by {}", id, username);
+        Optional<RoomDTO> roomOptional = roomService.softDeleteForUser(id, username);
+        if(roomOptional.isPresent()) {
+            RoomDTO roomDTO = roomOptional.get();
+            roomDTO.setLatestMessage(null);
+            roomDTO.setLatestMessageTime(null);
+            roomDTO.setUnreadMessagesNumber1(null);
+            roomDTO.setUnreadMessagesNumber2(null);
+
+            messagingTemplate.convertAndSendToUser(
+                username, "/room/deleted",
+                roomDTO
+            );
+        }
+    }
+
+    @MessageMapping("/room/delete/{id}//all-users")
+    public void softDeleteByAllUser(@DestinationVariable("id") String id) {
+        log.debug("REST request to soft delete Message for All Users : {}", id);
+        Optional<RoomDTO> roomOptional = roomService.softDeleteForAllUser(id);
+        if(roomOptional.isPresent()) {
+            RoomDTO roomDTO = roomOptional.get();
+            roomDTO.setLatestMessage(null);
+            roomDTO.setLatestMessageTime(null);
+            roomDTO.setUnreadMessagesNumber1(null);
+            roomDTO.setUnreadMessagesNumber2(null);
+
+            messagingTemplate.convertAndSendToUser(
+                roomDTO.getUser1(), "/room/deleted",
+                roomDTO
+            );
+
+            messagingTemplate.convertAndSendToUser(
+                roomDTO.getUser2(), "/room/deleted",
+                roomDTO
+            );
+        }
     }
 }

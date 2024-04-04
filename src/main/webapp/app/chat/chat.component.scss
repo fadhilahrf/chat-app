@@ -31,7 +31,7 @@
     padding: 10px;
 }
 
-.chats-list-container {
+.rooms-list-container {
     height: 100%;
     overflow-y: auto;
     background-color: $info;
@@ -266,3 +266,14 @@
     background: var(--messageColor);
     border-radius: 50%;
 }
+
+.room-toggle {
+    display: none;
+}
+
+.list-group-item:hover .room-toggle{
+    display: block;
+    position: absolute;
+    border-radius: 50%;
+}
+

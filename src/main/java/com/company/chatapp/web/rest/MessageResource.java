@@ -224,16 +224,16 @@ public class MessageResource {
     }
     
     @MessageMapping("/message/delete/{id}/user/{username}")
-    public void softDeleteMessage(@DestinationVariable("id") String id, @DestinationVariable("username") String username) {
+    public void softDeleteForUser(@DestinationVariable("id") String id, @DestinationVariable("username") String username) {
         log.debug("REST request to soft delete Message : {} by {}", id, username);
-        Optional<MessageDTO> messageOptional = messageService.softDeleteByUser(id, username);
+        Optional<MessageDTO> messageOptional = messageService.softDeleteForUser(id, username);
         if(messageOptional.isPresent()) {
             MessageDTO messageDTO = messageOptional.get();
             messageDTO.setIsDeleted(true);
             messageDTO.setContent("");
 
             messagingTemplate.convertAndSendToUser(
-                username, "/messages/deleted",
+                username, "/message/deleted",
                 messageDTO
         );
         }
@@ -241,20 +241,20 @@ public class MessageResource {
 
     @MessageMapping("/message/delete/{id}/all-users")
     public void softDeleteByAllUser(@DestinationVariable("id") String id) {
-        log.debug("REST request to soft delete Message for all users : {} by {}", id);
-        Optional<MessageDTO> messageOptional = messageService.softDeleteByAllUser(id);
+        log.debug("REST request to soft delete Message for All Users : {} by {}", id);
+        Optional<MessageDTO> messageOptional = messageService.softDeleteForAllUser(id);
         if(messageOptional.isPresent()) {
             MessageDTO messageDTO = messageOptional.get();
             messageDTO.setIsDeleted(true);
             messageDTO.setContent("");
 
             messagingTemplate.convertAndSendToUser(
-                messageDTO.getSender(), "/messages/deleted",
+                messageDTO.getSender(), "/message/deleted",
                 messageDTO
             );
 
             messagingTemplate.convertAndSendToUser(
-                messageDTO.getRecipient(), "/messages/deleted",
+                messageDTO.getRecipient(), "/message/deleted",
                 messageDTO
             );
         }

@@ -9,12 +9,41 @@
                 <input (focus)="onSearchInputFocused()" (keyup)="searchUsers($event)" autocomplete="off" type="text" id="search" placeholder="search user" name="search">
             </div>
         </form>
-        <div class="chats-list-container">
+        <div class="rooms-list-container">
             <ul class="list-group" *ngIf="!isInputFocused">
                 <ng-container *ngFor="let room of rooms; let i=index">
-                    <li class="list-group-item" [ngClass]="selectedRecipient?.login==getRoomRecipient(room)?'active':''" (click)="getRecipientChat(getRoomRecipient(room));">
-                        <div class="user">{{ getRoomRecipient(room) }} <span *ngIf="getUnreadMessagesNumber(room)" class="text-warning"> {{ getUnreadMessagesNumber(room) }} </span></div>
-                        <small class="message-overview"><span *ngIf="room.latestMessage?.read && account?.login==room.latestMessage?.sender" class="text-warning"><fa-icon icon="check" size="lg"></fa-icon>&nbsp;</span>{{ room.latestMessage?.content }} </small>
+                    <li class="list-group-item" [ngClass]="selectedRecipient?.login==getRoomRecipient(room)?'active':''" >
+                        <div
+                                ngbDropdown
+                                class="dropdown d-flex justify-content-end"
+                                display="dynamic"
+                        >
+                            <a class="nav-link dropdown-toggle room-toggle" ngbDropdownToggle href="javascript:void(0);" [id]="'room-menu-'+room.id">
+                                <fa-icon icon="angle-down"></fa-icon>
+                            </a>
+                            <ul class="dropdown-menu" ngbDropdownMenu>
+                                <li>
+                                    <a
+                                    class="dropdown-item"
+                                    (click)="deleteRoom(room, false)"
+                                    >
+                                    <span>Delete for me</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                    class="dropdown-item"
+                                    (click)="deleteRoom(room, true)"
+                                    >
+                                    <span>Delete for all</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div (click)="getRecipientChat(getRoomRecipient(room));">
+                            <div class="user">{{ getRoomRecipient(room) }} <span *ngIf="getUnreadMessagesNumber(room)" class="text-warning"> {{ getUnreadMessagesNumber(room) }} </span></div>
+                            <small class="message-overview"><span *ngIf="room.latestMessage?.read && account?.login==room.latestMessage?.sender" class="text-warning"><fa-icon icon="check" size="lg"></fa-icon>&nbsp;</span>{{ room.latestMessage?.content }} </small>
+                        </div>
                     </li>
                 </ng-container>
             </ul>
@@ -48,14 +77,14 @@
                                 class="dropdown d-flex justify-content-end"
                                 display="dynamic"
                             >
-                                <a class="nav-link dropdown-toggle message-toggle" style="--messageColor: {{ message.sender==account!.login ? $info : $primary }}" ngbDropdownToggle href="javascript:void(0);" [id]="message.id+'-menu'">
+                                <a class="nav-link dropdown-toggle message-toggle" style="--messageColor: {{ message.sender==account!.login ? $info : $primary }}" ngbDropdownToggle href="javascript:void(0);" [id]="'message-menu-'+message.id">
                                     <fa-icon icon="angle-down"></fa-icon>
                                 </a>
                                 <ul class="dropdown-menu" ngbDropdownMenu>
                                     <li>
                                         <a
                                         class="dropdown-item"
-                                        (click)="delete(message, false)"
+                                        (click)="deleteMessage(message, false)"
                                         >
                                         <span>Delete for me</span>
                                         </a>
@@ -63,7 +92,7 @@
                                     <li *ngIf="message.sender==account!.login">
                                         <a
                                         class="dropdown-item"
-                                        (click)="delete(message, true)"
+                                        (click)="deleteMessage(message, true)"
                                         >
                                         <span>Delete for all</span>
                                         </a>

@@ -11,7 +11,8 @@ import dayjs from 'dayjs/esm';
 import { IRoom } from 'app/entities/room/room.model';
 import { RoomService } from 'app/entities/room/service/room.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { MessageDeleteDialogComponent } from './dialogs/message-delete-dialog/message-delete-dialog.component';
+import { DeleteDialogComponent } from './dialogs/delete-dialog/delete-dialog.component';
+import { DeleteConfirmation, DeleteType } from 'app/app.constants';
 
 @Component({
   selector: 'jhi-chat',
@@ -109,18 +110,41 @@ export class ChatComponent implements OnInit {
       }
       });
 
-      this.stompService.getStomp().subscribe(`/user/${this.account!.login}/messages/deleted`, (payload)=>{
+      this.stompService.getStomp().subscribe(`/user/${this.account!.login}/message/deleted`, (payload)=>{
         try {
           if(JSON.parse(payload.body)) {
             const message: IMessage = JSON.parse(payload.body);
             
             this.groupedMessages.forEach(groupedMessage=>{
-              groupedMessage.messages.forEach(m=>{
-                  if(m.id==message.id) {
-                    m.isDeleted = message.isDeleted;
-                  }
+              groupedMessage.messages.forEach((item, index, object)=>{
+                if (item.id === message.id) {
+                  object.splice(index, 1);
+                }
               })
             });
+          }
+      } catch (error) {
+          if (error instanceof TypeError) {
+              console.error("Caught a TypeError:", error.message);
+          } else {
+              throw error;
+          }
+      }
+      });
+
+      this.stompService.getStomp().subscribe(`/user/${this.account!.login}/room/deleted`, (payload)=>{
+        try {
+          if(JSON.parse(payload.body)) {
+            const room: IRoom = JSON.parse(payload.body);
+
+            this.rooms.forEach((item, index, object)=>{
+              if (item.id === room.id) {
+                object.splice(index, 1);
+                if((this.selectedRecipient?.login==room.user1 || this.selectedRecipient?.login==room.user2) && this.selectedRecipient?.login!=this.account!.login) {
+                  this.selectedRecipient = null;
+                }
+              }
+            })
           }
       } catch (error) {
           if (error instanceof TypeError) {
@@ -270,16 +294,40 @@ export class ChatComponent implements OnInit {
       }
   }
 
-  delete(message: IMessage, isForAll: boolean): void {
-    const modalRef = this.modalService.open(MessageDeleteDialogComponent, { size: 'md', centered: true });
-    modalRef.componentInstance.message = message;
-    modalRef.componentInstance.isForAll = isForAll;
+  deleteMessage(message: IMessage, isForAll: boolean): void {
+    const modalRef = this.modalService.open(DeleteDialogComponent, { size: 'md', centered: true });
+    modalRef.componentInstance.entity = message;
+    modalRef.componentInstance.type = DeleteType.MESSAGE;
+    if(isForAll) {
+      modalRef.componentInstance.confirmation = DeleteConfirmation.FOR_ALL_MESSAGE;
+    }else {
+      modalRef.componentInstance.confirmation = DeleteConfirmation.FOR_YOU_MESSAGE;
+    }
 
     modalRef.closed.subscribe(state=>{
       if(isForAll){
         this.stompService.send(`/app/message/delete/${message.id}/all-users`, {}, JSON.stringify({}));
       }else {
         this.stompService.send(`/app/message/delete/${message.id}/user/${this.account!.login}`, {}, JSON.stringify({}));
+      }
+    })
+  }
+
+  deleteRoom(room: IRoom, isForAll: boolean): void {
+    const modalRef = this.modalService.open(DeleteDialogComponent, { size: 'md', centered: true });
+    modalRef.componentInstance.entity = room;
+    modalRef.componentInstance.type = DeleteType.ROOM;
+    if(isForAll) {
+      modalRef.componentInstance.confirmation = DeleteConfirmation.FOR_ALL_ROOM;
+    }else {
+      modalRef.componentInstance.confirmation = DeleteConfirmation.FOR_YOU_ROOM;
+    }
+
+    modalRef.closed.subscribe(state=>{
+      if(isForAll){
+        this.stompService.send(`/app/room/delete/${room.id}/all-users`, {}, JSON.stringify({}));
+      }else {
+        this.stompService.send(`/app/room/delete/${room.id}/user/${this.account!.login}`, {}, JSON.stringify({}));
       }
     })
   }

@@ -1,14 +1,18 @@
 package com.company.chatapp.service;
 
+import com.company.chatapp.domain.Message;
 import com.company.chatapp.domain.Room;
+import com.company.chatapp.repository.MessageRepository;
 import com.company.chatapp.repository.RoomRepository;
 import com.company.chatapp.security.SecurityUtils;
+import com.company.chatapp.service.dto.MessageDTO;
 import com.company.chatapp.service.dto.RoomDTO;
 import com.company.chatapp.service.mapper.RoomMapper;
 
 import javassist.NotFoundException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -30,9 +34,12 @@ public class RoomService {
 
     private final RoomMapper roomMapper;
 
-    public RoomService(RoomRepository roomRepository, RoomMapper roomMapper) {
+    private final MessageRepository messageRepository;
+
+    public RoomService(RoomRepository roomRepository, RoomMapper roomMapper, MessageRepository messageRepository) {
         this.roomRepository = roomRepository;
         this.roomMapper = roomMapper;
+        this.messageRepository = messageRepository;
     }
 
     /**
@@ -100,7 +107,21 @@ public class RoomService {
     public List<RoomDTO> findAllByCurrentUserSortedByLatestMessageTime(String currentUser) {
         log.debug("Request to get all Rooms sorted by latest message time by user");
         Sort sort = Sort.by(Sort.Direction.DESC, "latestMessageTime");
-        return roomRepository.findAllByCurrentUserSortedBy(currentUser, sort).stream().map(roomMapper::toDto).toList();
+        return roomRepository.findAllByCurrentUserSortedBy(currentUser, sort).stream().filter(room->{
+            List<String> roomDeleters = new ArrayList<>(Arrays.asList(room.getDeletedBy().split(";")));
+            return !roomDeleters.contains(currentUser);
+        }).map(room->{
+            RoomDTO roomDTO = roomMapper.toDto(room);
+            Optional<Message> messageOptional = messageRepository.findFirstByRoomAndDeletedByNotContainingOrderByDeliveryTimeDesc(room, currentUser);
+            if(messageOptional.isPresent()) {
+                MessageDTO messageDTO = new MessageDTO();
+                messageDTO.setSender(messageOptional.get().getSender());
+                messageDTO.setContent(messageOptional.get().getContent());
+                messageDTO.setRead(messageOptional.get().getRead());
+                roomDTO.setLatestMessage(messageDTO);
+            }
+            return roomDTO;
+        }).toList();
     }
 
     public List<RoomDTO> findAllByCurrentUser() {
@@ -167,5 +188,75 @@ public class RoomService {
     public void delete(String id) {
         log.debug("Request to delete Room : {}", id);
         roomRepository.deleteById(id);
+    }
+
+    public Optional<RoomDTO> softDeleteForUser(String id, String username) {
+        Optional<Room> roomOptional = roomRepository.findById(id);
+
+        if(roomOptional.isPresent()) {
+            Room room = roomOptional.get();
+            if(room.getUser1().equals(username) || room.getUser2().equals(username)) {
+                List<String> roomDeleters = new ArrayList<>(Arrays.asList(room.getDeletedBy().split(";")));
+                if(!roomDeleters.contains(username)) {
+                    roomDeleters.add(username);
+                }
+
+                room.setDeletedBy(String.join(";", roomDeleters.stream().filter(s -> !s.isEmpty()).toList()));
+                
+                List<Message> messages = messageRepository.findAllByRoom(room);
+
+                messages.forEach(message->{
+                    if(message.getSender().equals(username) || message.getRecipient().equals(username)) {
+                        List<String> messageDeleters = new ArrayList<>(Arrays.asList(message.getDeletedBy().split(";")));
+                        if(!messageDeleters.contains(username)) {
+                            messageDeleters.add(username);
+                        }
+        
+                        message.setDeletedBy(String.join(";", messageDeleters.stream().filter(s -> !s.isEmpty()).toList()));
+                        
+                        messageRepository.save(message);
+                    }
+                });
+
+                return Optional.of(roomRepository.save(room)).map(roomMapper::toDto);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<RoomDTO> softDeleteForAllUser(String id) {
+        Optional<Room> roomOptional = roomRepository.findById(id);
+
+        if(roomOptional.isPresent()) {
+            Room room = roomOptional.get();
+
+            List<String> users = new ArrayList<>();
+            users.add(room.getUser1());
+            users.add(room.getUser2());
+
+            room.setDeletedBy(String.join(";", users.stream().filter(s -> !s.isEmpty()).toList()));
+
+            List<Message> messages = messageRepository.findAllByRoom(room);
+
+                messages.forEach(message->{
+                    List<String> messageDeleters = new ArrayList<>(Arrays.asList(message.getDeletedBy().split(";")));
+                    if(!messageDeleters.contains(room.getUser1())) {
+                        messageDeleters.add(room.getUser1());
+                    }
+    
+                    if(!messageDeleters.contains(room.getUser2())) {
+                        messageDeleters.add(room.getUser2());
+                    }
+
+                    message.setDeletedBy(String.join(";", messageDeleters.stream().filter(s -> !s.isEmpty()).toList()));
+                    
+                    messageRepository.save(message);
+                });
+            
+            return Optional.of(roomRepository.save(room)).map(roomMapper::toDto);
+        }
+
+        return Optional.empty();
     }
 }

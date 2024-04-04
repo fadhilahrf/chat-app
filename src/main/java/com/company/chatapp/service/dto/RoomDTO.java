@@ -21,7 +21,7 @@ public class RoomDTO implements Serializable {
     @NotNull
     private String user2;
 
-    private String deletedBy;
+    private String deletedBy="";
 
     private Instant latestMessageTime;
 
@@ -41,13 +41,6 @@ public class RoomDTO implements Serializable {
         this.latestMessageTime = room.getLatestMessageTime();
         this.unreadMessagesNumber1 = room.getUnreadMessagesNumber1();
         this.unreadMessagesNumber2 = room.getUnreadMessagesNumber2();
-        this.latestMessage = new MessageDTO();
-        this.latestMessage.setId(room.getLatestMessage().getId());
-        this.latestMessage.setSender(room.getLatestMessage().getSender());
-        this.latestMessage.setRecipient(room.getLatestMessage().getRecipient());
-        this.latestMessage.setContent(room.getLatestMessage().getContent());
-        this.latestMessage.setRead(room.getLatestMessage().getRead());
-        this.latestMessage.setDeliveryTime(room.getLatestMessage().getDeliveryTime());
     }
 
     public String getId() {

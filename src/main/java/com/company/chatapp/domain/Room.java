@@ -29,15 +29,16 @@ public class Room extends AbstractAuditingEntity<String> {
     private String user2;
 
     @Field("deleted_by")
-    private String deletedBy;
+    private String deletedBy="";
 
+    @Field("latest_message_time")
     private Instant latestMessageTime;
 
+    @Field("unread_messages_number1")
     private Integer unreadMessagesNumber1 = 0;
     
+    @Field("unread_messages_number2")
     private Integer unreadMessagesNumber2 = 0;
-
-    private Message latestMessage;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
@@ -116,15 +117,7 @@ public class Room extends AbstractAuditingEntity<String> {
     public void setUnreadMessagesNumber2(Integer unreadMessagesNumber2) {
         this.unreadMessagesNumber2 = unreadMessagesNumber2;
     }
-
-    public Message getLatestMessage() {
-        return latestMessage;
-    }
-
-    public void setLatestMessage(Message latestMessage) {
-        this.latestMessage = latestMessage;
-    }
-
+    
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override

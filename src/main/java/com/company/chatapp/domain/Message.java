@@ -39,10 +39,14 @@ public class Message extends AbstractAuditingEntity<String> {
     @JsonIgnoreProperties(value = { "messages" }, allowSetters = true)
     private Room room;
 
+    @Field("delivery_time")
     private Instant deliveryTime = Instant.now();
 
+    @Field("read")
     private Boolean read = false;
 
+    
+    @Field("deleted_by")
     private String deletedBy="";
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
