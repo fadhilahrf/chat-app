@@ -1,16 +1,13 @@
 import { Component, ViewEncapsulation } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { DeleteConfirmation, DeleteType } from 'app/app.constants';
-import { ITEM_DELETED_EVENT } from 'app/config/navigation.constants';
-import { IMessage } from 'app/entities/message/message.model';
+import { DeleteType } from 'app/app.constants';
 import { MessageService } from 'app/entities/message/service/message.service';
 import SharedModule from 'app/shared/shared.module';
 
 @Component({
   selector: 'delete-dialog',
   standalone: true,
-  imports: [SharedModule, FormsModule],
+  imports: [SharedModule],
   templateUrl: './delete-dialog.component.html',
   styleUrl: './delete-dialog.component.scss',
   encapsulation: ViewEncapsulation.None,

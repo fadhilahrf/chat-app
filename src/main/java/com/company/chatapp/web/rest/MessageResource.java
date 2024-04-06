@@ -218,6 +218,23 @@ public class MessageResource {
         );
     }
 
+    @MessageMapping("/message/edit")
+    public void editMessage(@Payload MessageDTO messageDTO) {
+        messageDTO.setDeliveryTime(Instant.now());
+        Optional<MessageDTO> messageOptional = messageService.editMessage(messageDTO);
+        if(messageOptional.isPresent()) {
+            messagingTemplate.convertAndSendToUser(
+                messageOptional.get().getSender(), "/message/edited",
+                messageOptional.get()
+            );
+
+            messagingTemplate.convertAndSendToUser(
+                messageOptional.get().getRecipient(), "/message/edited",
+                messageOptional.get()
+            );
+        }
+    }
+
     @GetMapping("/user/{recipient}")
     public ResponseEntity<List<MessageDTO>> getAllMessagesBySenderAndRecipient(@PathVariable("recipient") String recipient) {
         return ResponseEntity.ok(messageService.findAllBySenderAndRecipient(recipient));
@@ -240,9 +257,9 @@ public class MessageResource {
     }
 
     @MessageMapping("/message/delete/{id}/all-users")
-    public void softDeleteByAllUser(@DestinationVariable("id") String id) {
+    public void softDeleteByAllUsers(@DestinationVariable("id") String id) {
         log.debug("REST request to soft delete Message for All Users : {} by {}", id);
-        Optional<MessageDTO> messageOptional = messageService.softDeleteForAllUser(id);
+        Optional<MessageDTO> messageOptional = messageService.softDeleteForAllUsers(id);
         if(messageOptional.isPresent()) {
             MessageDTO messageDTO = messageOptional.get();
             messageDTO.setIsDeleted(true);

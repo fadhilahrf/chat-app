@@ -81,6 +81,14 @@
                                     <fa-icon icon="angle-down"></fa-icon>
                                 </a>
                                 <ul class="dropdown-menu" ngbDropdownMenu>
+                                    <li *ngIf="message.sender==account!.login">
+                                        <a
+                                        class="dropdown-item"
+                                        (click)="editMessage(message)"
+                                        >
+                                        <span>Edit</span>
+                                        </a>
+                                    </li>
                                     <li>
                                         <a
                                         class="dropdown-item"
@@ -100,7 +108,7 @@
                                 </ul>
                             </div>
                             <p> {{ message.content }} </p>
-                            <span class="delivery-time"><span class="text-warning" *ngIf="message.read && message.sender==account?.login"><fa-icon icon="check" size="lg"></fa-icon></span>  &nbsp; {{ getTime(message.deliveryTime!.toString()) }}</span>
+                            <span class="status"> <small *ngIf="message.isEdited">edited &nbsp;</small><span class="text-warning" *ngIf="message.read && message.sender==account?.login"><fa-icon icon="check" size="lg"></fa-icon> &nbsp; </span> {{ getTime(message.deliveryTime!.toString()) }}</span>
                         </div>
                     </ng-container>
                 </ng-container>
@@ -108,7 +116,7 @@
         </div>
         <form id="messageForm" name="messageForm" >
             <div class="message-input p-2">
-                <input autocomplete="off" type="text" id="message" placeholder="Type your message..." name="content"  [(ngModel)]="messageForm!.content">
+                <input autocomplete="off" type="text" id="content" placeholder="Type your message..." name="content"  [(ngModel)]="messageForm!.content">
                 <button class="btn btn-link text-light" type="submit" (click)="sendMessage()" [disabled]="!messageForm.content"><fa-icon icon="angle-right" size="2xl"></fa-icon></button>
             </div>
         </form>

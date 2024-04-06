@@ -216,9 +216,9 @@ public class RoomResource {
     }
 
     @MessageMapping("/room/delete/{id}//all-users")
-    public void softDeleteByAllUser(@DestinationVariable("id") String id) {
+    public void softDeleteByAllUsers(@DestinationVariable("id") String id) {
         log.debug("REST request to soft delete Message for All Users : {}", id);
-        Optional<RoomDTO> roomOptional = roomService.softDeleteForAllUser(id);
+        Optional<RoomDTO> roomOptional = roomService.softDeleteForAllUsers(id);
         if(roomOptional.isPresent()) {
             RoomDTO roomDTO = roomOptional.get();
             roomDTO.setLatestMessage(null);

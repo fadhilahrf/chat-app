@@ -10,6 +10,7 @@ export interface IMessage {
   deliveryTime?: dayjs.Dayjs | null;
   read?: boolean | null;
   isDeleted?: boolean | null;
+  isEdited?: boolean | null;
 }
 
 export interface IGroupedMessage  { 

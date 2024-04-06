@@ -8,8 +8,6 @@ import com.company.chatapp.service.dto.MessageDTO;
 import com.company.chatapp.service.dto.RoomDTO;
 import com.company.chatapp.service.mapper.MessageMapper;
 
-import javassist.NotFoundException;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,6 +100,22 @@ public class MessageService {
         return messageMapper.toDto(message);
     }
 
+    public Optional<MessageDTO> editMessage(MessageDTO messageDTO) {
+        log.debug("Request to edit Message : {}", messageDTO);
+        Optional<Message> messageOptional = messageRepository.findById(messageDTO.getId());
+
+        if(messageOptional.isPresent()) {
+            if(!messageDTO.getContent().equals(messageOptional.get().getContent())) {
+                Message message = messageOptional.get();
+                message.setIsEdited(true);
+                message.setContent(messageDTO.getContent());
+                message = messageRepository.save(message);
+                return Optional.of(messageMapper.toDto(message));
+            }
+        }
+        return Optional.empty();
+    }
+
     /**
      * Partially update a message.
      *
@@ -134,7 +148,7 @@ public class MessageService {
     }
 
     public List<MessageDTO> findAllBySenderAndRecipient(String sender, String recipient) {
-        log.debug("findAllBySenderAndRecipient: {} {}", sender, recipient);
+        log.debug("Request to find all by Sender and Recipient: {} {}", sender, recipient);
         Optional<Room> roomOptional = roomService.findByUser1AndUser2(sender, recipient);
         if(roomOptional.isPresent()){
             Room room = roomOptional.get();
@@ -149,18 +163,15 @@ public class MessageService {
     }
 
     public List<MessageDTO> findAllBySenderAndRecipient(String recipient) {
-        log.debug("findAllBySenderAndRecipient: {}", recipient);
+        log.debug("Request to find all by Sender and Recipient: {}", recipient);
         
-        String sender="";
+        Optional<String> senderOptional = SecurityUtils.getCurrentUserLogin();
 
-        try {
-            sender = SecurityUtils.getCurrentUserLogin().orElseThrow(()-> new NotFoundException("Username not found"));
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(senderOptional.isPresent()) {
+            return findAllBySenderAndRecipient(senderOptional.get(), recipient);
         }
-       
-        return findAllBySenderAndRecipient(sender, recipient);
+
+        return new ArrayList<>();
     }
 
     /**
@@ -185,6 +196,7 @@ public class MessageService {
     }
 
     public Optional<MessageDTO> softDeleteForUser(String id, String username) {
+        log.debug("Request to soft delete Message : {} for user : {}", id, username);
         Optional<Message> messageOptional = messageRepository.findById(id);
         if(messageOptional.isPresent()) {
             Message message = messageOptional.get();
@@ -203,7 +215,8 @@ public class MessageService {
         return Optional.empty();
     }
 
-    public Optional<MessageDTO> softDeleteForAllUser(String id) {
+    public Optional<MessageDTO> softDeleteForAllUsers(String id) {
+        log.debug("Request to soft delete Message for all users : {}", id);
         Optional<Message> messageOptional = messageRepository.findById(id);
         if(messageOptional.isPresent()) {
             Message message = messageOptional.get();

@@ -9,8 +9,6 @@ import com.company.chatapp.service.dto.MessageDTO;
 import com.company.chatapp.service.dto.RoomDTO;
 import com.company.chatapp.service.mapper.RoomMapper;
 
-import javassist.NotFoundException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -125,24 +123,18 @@ public class RoomService {
     }
 
     public List<RoomDTO> findAllByCurrentUser() {
-        try {
-            String username = SecurityUtils.getCurrentUserLogin().orElseThrow(()-> new NotFoundException("Username not found"));
-
-            return findAllByCurrentUser(username);
-        } catch( Exception e ) {
-            e.printStackTrace();
+        Optional<String> usernameOptional = SecurityUtils.getCurrentUserLogin();
+        if(usernameOptional.isPresent()) {
+            return findAllByCurrentUser(usernameOptional.get());
         }
 
         return new ArrayList<>();
     }
 
     public List<RoomDTO> findAllByCurrentUserSortedByLatestMessageTime() {
-        try {
-            String username = SecurityUtils.getCurrentUserLogin().orElseThrow(()-> new NotFoundException("Username not found"));
-
-            return findAllByCurrentUserSortedByLatestMessageTime(username);
-        } catch( Exception e ) {
-            e.printStackTrace();
+        Optional<String> usernameOptional = SecurityUtils.getCurrentUserLogin();
+        if(usernameOptional.isPresent()) {
+            return findAllByCurrentUserSortedByLatestMessageTime(usernameOptional.get());
         }
 
         return new ArrayList<>();
@@ -154,9 +146,29 @@ public class RoomService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    public Optional<RoomDTO> findOne(String id) {
+    public Optional<RoomDTO> findOne(String id, String currentUser) {
         log.debug("Request to get Room : {}", id);
-        return roomRepository.findById(id).map(roomMapper::toDto);
+        return roomRepository.findById(id).map(room->{
+            RoomDTO roomDTO = roomMapper.toDto(room);
+            Optional<Message> messageOptional = messageRepository.findFirstByRoomAndDeletedByNotContainingOrderByDeliveryTimeDesc(room, currentUser);
+            if(messageOptional.isPresent()) {
+                MessageDTO messageDTO = new MessageDTO();
+                messageDTO.setSender(messageOptional.get().getSender());
+                messageDTO.setContent(messageOptional.get().getContent());
+                messageDTO.setRead(messageOptional.get().getRead());
+                roomDTO.setLatestMessage(messageDTO);
+            }
+            return roomDTO;
+        });
+    }
+
+    public Optional<RoomDTO> findOne(String id) {
+        Optional<String> usernameOptional = SecurityUtils.getCurrentUserLogin();
+        if(usernameOptional.isPresent()) {
+            return findOne(id, usernameOptional.get());
+        }
+
+        return Optional.empty();
     }
 
     public Optional<Room> findByUser1AndUser2(String user1, String user2) {
@@ -191,6 +203,7 @@ public class RoomService {
     }
 
     public Optional<RoomDTO> softDeleteForUser(String id, String username) {
+        log.debug("Request to soft delete Room : {} for user : {}", id, username);
         Optional<Room> roomOptional = roomRepository.findById(id);
 
         if(roomOptional.isPresent()) {
@@ -225,7 +238,8 @@ public class RoomService {
         return Optional.empty();
     }
 
-    public Optional<RoomDTO> softDeleteForAllUser(String id) {
+    public Optional<RoomDTO> softDeleteForAllUsers(String id) {
+        log.debug("Request to soft delete Room for all users : {}", id);
         Optional<Room> roomOptional = roomRepository.findById(id);
 
         if(roomOptional.isPresent()) {

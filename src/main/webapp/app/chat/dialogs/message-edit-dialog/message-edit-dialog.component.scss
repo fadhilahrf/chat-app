@@ -1,0 +1,27 @@
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+
+.modal-content {
+    border-radius: 10px !important;
+}
+
+.modal-body.prev-message {
+    background-color: $primary;
+    color: white;
+}
+
+.modal-footer {
+    justify-content: center;
+}
+
+.message-edit-input {
+    width: 85%;
+}
+
+.message-edit-btn {
+    width: auto;
+}
+
+.message-edit-form {
+    width: 100%;
+}

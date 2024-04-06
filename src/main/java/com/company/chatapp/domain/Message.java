@@ -45,7 +45,9 @@ public class Message extends AbstractAuditingEntity<String> {
     @Field("read")
     private Boolean read = false;
 
-    
+    @Field("is_edited")
+    private Boolean isEdited = false;
+
     @Field("deleted_by")
     private String deletedBy="";
 
@@ -130,6 +132,14 @@ public class Message extends AbstractAuditingEntity<String> {
 
     public void setRead(Boolean read) {
         this.read = read;
+    }
+
+    public Boolean getIsEdited() {
+        return isEdited;
+    }
+
+    public void setIsEdited(Boolean isEdited) {
+        this.isEdited = isEdited;
     }
 
     public String getDeletedBy() {

@@ -30,6 +30,8 @@ public class MessageDTO implements Serializable {
 
     private Boolean isDeleted = false;
 
+    private Boolean isEdited = false;
+
     public String getId() {
         return id;
     }
@@ -92,6 +94,14 @@ public class MessageDTO implements Serializable {
 
     public void setIsDeleted(Boolean isDeleted) {
         this.isDeleted = isDeleted;
+    }
+
+    public Boolean getIsEdited() {
+        return isEdited;
+    }
+
+    public void setIsEdited(Boolean isEdited) {
+        this.isEdited = isEdited;
     }
 
     @Override

@@ -13,6 +13,7 @@ import { RoomService } from 'app/entities/room/service/room.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DeleteDialogComponent } from './dialogs/delete-dialog/delete-dialog.component';
 import { DeleteConfirmation, DeleteType } from 'app/app.constants';
+import { MessageEditDialogComponent } from './dialogs/message-edit-dialog/message-edit-dialog.component';
 
 @Component({
   selector: 'jhi-chat',
@@ -96,9 +97,34 @@ export class ChatComponent implements OnInit {
                 groupedMessage.messages.forEach(m=>{
                     if(m.id==message.id) {
                       m.read = message.read;
+                      this.updateRoomLatestMessage(message.room?.id!);
                     }
                 })
               });
+            });
+          }
+      } catch (error) {
+          if (error instanceof TypeError) {
+              console.error("Caught a TypeError:", error.message);
+          } else {
+              throw error;
+          }
+      }
+      });
+
+      this.stompService.getStomp().subscribe(`/user/${this.account!.login}/message/edited`, (payload)=>{
+        try {
+          if(JSON.parse(payload.body)) {
+            const message: IMessage = JSON.parse(payload.body);
+            
+            this.groupedMessages.forEach(groupedMessage=>{
+              groupedMessage.messages.forEach(m=>{
+                if (m.id === message.id) {
+                  m.isEdited = message.isEdited;
+                  m.content = message.content;
+                  this.updateRoomLatestMessage(message.room?.id!);
+                }
+              })
             });
           }
       } catch (error) {
@@ -119,6 +145,7 @@ export class ChatComponent implements OnInit {
               groupedMessage.messages.forEach((item, index, object)=>{
                 if (item.id === message.id) {
                   object.splice(index, 1);
+                  this.updateRoomLatestMessage(message.room?.id!);
                 }
               })
             });
@@ -193,7 +220,19 @@ export class ChatComponent implements OnInit {
       if(res.body) {
         this.rooms = res.body;
       }
-    })
+    });
+  }
+
+  updateRoomLatestMessage(id: string): void {
+    this.roomService.find(id).subscribe(res=>{
+      if(res.body) {
+        this.rooms.forEach(room=>{
+          if(res.body?.id == room.id) {
+            room.latestMessage = res.body.latestMessage;
+          }
+        })
+      }
+    });
   }
 
   getMessages(recipient: IUser, firstInit: boolean): void {
@@ -310,7 +349,19 @@ export class ChatComponent implements OnInit {
       }else {
         this.stompService.send(`/app/message/delete/${message.id}/user/${this.account!.login}`, {}, JSON.stringify({}));
       }
-    })
+    });
+  }
+
+  editMessage(message: IMessage): void {
+    const modalRef = this.modalService.open(MessageEditDialogComponent, { size: 'md', centered: true });
+    modalRef.componentInstance.prevMessageContent = message.content;
+
+    modalRef.componentInstance.editedMessage.subscribe((newMessageContent: string)=>{
+      if(message.content!=newMessageContent) {
+        message.content=newMessageContent;
+        this.stompService.send('/app/message/edit', {}, JSON.stringify(message));
+      }
+    });
   }
 
   deleteRoom(room: IRoom, isForAll: boolean): void {
@@ -329,7 +380,7 @@ export class ChatComponent implements OnInit {
       }else {
         this.stompService.send(`/app/room/delete/${room.id}/user/${this.account!.login}`, {}, JSON.stringify({}));
       }
-    })
+    });
   }
 
   countNotDeletedMessages(messages: IMessage[]): number {

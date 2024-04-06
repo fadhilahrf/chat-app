@@ -1,1 +1,18 @@
-<p>message-edit-dialog works!</p>
+@if (prevMessageContent) {
+    <div class="modal-header">
+      <h4 class="modal-title">Edit Message</h4>
+    </div>
+  
+    <div class="modal-body prev-message">
+        {{ prevMessageContent }}
+    </div>
+  
+    <div class="modal-footer">
+        <form id="message" name="message" class="message-edit-form" >
+            <div class="message-input">
+                <input class="message-edit-input" autocomplete="off" type="text" id="content" placeholder="Type your message..." name="content" [(ngModel)]="newMessageContent">
+                <button class="btn btn-link message-edit-btn" type="submit" (click)="save()" [disabled]="!newMessageContent"><fa-icon icon="angle-right" size="2xl"></fa-icon></button>
+            </div>
+        </form>
+    </div>
+}
