@@ -18,7 +18,7 @@ import { Account } from 'app/core/auth/account.model';
 })
 export default class MainComponent implements OnInit {
   user: IUser | null = null;
-  private isRefreshing = false;
+
   constructor(
     private router: Router,
     private appPageTitleStrategy: AppPageTitleStrategy,
@@ -41,14 +41,5 @@ export default class MainComponent implements OnInit {
           this.stompService.send('/app/user.connect', {}, JSON.stringify(this.user));
         }
       });
-      this.isRefreshing = true;
-  }
-
-  @HostListener('window:beforeunload', ['$event'])
-  onBeforeUnload(event: Event): void {
-    if(this.user && !this.isRefreshing) {
-      this.stompService.send('/app/user.disconnect', {}, JSON.stringify(this.user));
-    }
-    this.isRefreshing = false;
   }
 }

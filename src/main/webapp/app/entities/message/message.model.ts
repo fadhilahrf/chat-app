@@ -6,11 +6,12 @@ export interface IMessage {
   sender?: string | null;
   recipient?: string | null;
   content?: string | null;
-  room?: Pick<IRoom, 'id'> | null;
+  roomId?: string | null;
   deliveryTime?: dayjs.Dayjs | null;
   read?: boolean | null;
   isDeleted?: boolean | null;
   isEdited?: boolean | null;
+  replyTo?: IMessage | null;
 }
 
 export interface IGroupedMessage  { 

@@ -58,7 +58,10 @@ class MessageResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Message createEntity() {
-        Message message = new Message().sender(DEFAULT_SENDER).recipient(DEFAULT_RECIPIENT).content(DEFAULT_CONTENT);
+        Message message = new Message();
+        message.setSender(DEFAULT_SENDER);
+        message.setRecipient(DEFAULT_RECIPIENT);
+        message.setContent(DEFAULT_CONTENT);
         return message;
     }
 
@@ -69,7 +72,10 @@ class MessageResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Message createUpdatedEntity() {
-        Message message = new Message().sender(UPDATED_SENDER).recipient(UPDATED_RECIPIENT).content(UPDATED_CONTENT);
+        Message message = new Message();
+        message.setSender(UPDATED_SENDER);
+        message.setRecipient(UPDATED_RECIPIENT);
+        message.setContent(UPDATED_CONTENT);
         return message;
     }
 
@@ -213,7 +219,9 @@ class MessageResourceIT {
 
         // Update the message
         Message updatedMessage = messageRepository.findById(message.getId()).orElseThrow();
-        updatedMessage.sender(UPDATED_SENDER).recipient(UPDATED_RECIPIENT).content(UPDATED_CONTENT);
+        updatedMessage.setSender(UPDATED_SENDER);
+        updatedMessage.setRecipient(UPDATED_RECIPIENT);
+        updatedMessage.setContent(UPDATED_CONTENT);
         MessageDTO messageDTO = messageMapper.toDto(updatedMessage);
 
         restMessageMockMvc
@@ -305,8 +313,9 @@ class MessageResourceIT {
         // Update the message using partial update
         Message partialUpdatedMessage = new Message();
         partialUpdatedMessage.setId(message.getId());
+        partialUpdatedMessage.setSender(UPDATED_SENDER);
 
-        partialUpdatedMessage.sender(UPDATED_SENDER).content(UPDATED_CONTENT);
+        partialUpdatedMessage.setContent(UPDATED_CONTENT);
 
         restMessageMockMvc
             .perform(
@@ -335,8 +344,9 @@ class MessageResourceIT {
         // Update the message using partial update
         Message partialUpdatedMessage = new Message();
         partialUpdatedMessage.setId(message.getId());
-
-        partialUpdatedMessage.sender(UPDATED_SENDER).recipient(UPDATED_RECIPIENT).content(UPDATED_CONTENT);
+        partialUpdatedMessage.setSender(UPDATED_SENDER);
+        partialUpdatedMessage.setRecipient(DEFAULT_RECIPIENT);
+        partialUpdatedMessage.setContent(UPDATED_CONTENT);
 
         restMessageMockMvc
             .perform(

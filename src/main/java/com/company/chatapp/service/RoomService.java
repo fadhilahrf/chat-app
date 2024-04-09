@@ -110,7 +110,7 @@ public class RoomService {
             return !roomDeleters.contains(currentUser);
         }).map(room->{
             RoomDTO roomDTO = roomMapper.toDto(room);
-            Optional<Message> messageOptional = messageRepository.findFirstByRoomAndDeletedByNotContainingOrderByDeliveryTimeDesc(room, currentUser);
+            Optional<Message> messageOptional = messageRepository.findFirstByRoomIdAndDeletedByNotContainingOrderByDeliveryTimeDesc(room.getId(), currentUser);
             if(messageOptional.isPresent()) {
                 MessageDTO messageDTO = new MessageDTO();
                 messageDTO.setSender(messageOptional.get().getSender());
@@ -150,7 +150,7 @@ public class RoomService {
         log.debug("Request to get Room : {}", id);
         return roomRepository.findById(id).map(room->{
             RoomDTO roomDTO = roomMapper.toDto(room);
-            Optional<Message> messageOptional = messageRepository.findFirstByRoomAndDeletedByNotContainingOrderByDeliveryTimeDesc(room, currentUser);
+            Optional<Message> messageOptional = messageRepository.findFirstByRoomIdAndDeletedByNotContainingOrderByDeliveryTimeDesc(room.getId(), currentUser);
             if(messageOptional.isPresent()) {
                 MessageDTO messageDTO = new MessageDTO();
                 messageDTO.setSender(messageOptional.get().getSender());
@@ -216,7 +216,7 @@ public class RoomService {
 
                 room.setDeletedBy(String.join(";", roomDeleters.stream().filter(s -> !s.isEmpty()).toList()));
                 
-                List<Message> messages = messageRepository.findAllByRoom(room);
+                List<Message> messages = messageRepository.findAllByRoomId(room.getId());
 
                 messages.forEach(message->{
                     if(message.getSender().equals(username) || message.getRecipient().equals(username)) {
@@ -230,6 +230,12 @@ public class RoomService {
                         messageRepository.save(message);
                     }
                 });
+                
+                if(room.getUser1().equals(username)) {
+                    room.setUnreadMessagesNumber1(0);
+                }else {
+                    room.setUnreadMessagesNumber2(0);
+                }
 
                 return Optional.of(roomRepository.save(room)).map(roomMapper::toDto);
             }
@@ -251,23 +257,26 @@ public class RoomService {
 
             room.setDeletedBy(String.join(";", users.stream().filter(s -> !s.isEmpty()).toList()));
 
-            List<Message> messages = messageRepository.findAllByRoom(room);
+            List<Message> messages = messageRepository.findAllByRoomId(room.getId());
 
-                messages.forEach(message->{
-                    List<String> messageDeleters = new ArrayList<>(Arrays.asList(message.getDeletedBy().split(";")));
-                    if(!messageDeleters.contains(room.getUser1())) {
-                        messageDeleters.add(room.getUser1());
-                    }
-    
-                    if(!messageDeleters.contains(room.getUser2())) {
-                        messageDeleters.add(room.getUser2());
-                    }
+            messages.forEach(message->{
+                List<String> messageDeleters = new ArrayList<>(Arrays.asList(message.getDeletedBy().split(";")));
+                if(!messageDeleters.contains(room.getUser1())) {
+                    messageDeleters.add(room.getUser1());
+                }
 
-                    message.setDeletedBy(String.join(";", messageDeleters.stream().filter(s -> !s.isEmpty()).toList()));
-                    
-                    messageRepository.save(message);
-                });
+                if(!messageDeleters.contains(room.getUser2())) {
+                    messageDeleters.add(room.getUser2());
+                }
+
+                message.setDeletedBy(String.join(";", messageDeleters.stream().filter(s -> !s.isEmpty()).toList()));
+                
+                messageRepository.save(message);
+            });
             
+            room.setUnreadMessagesNumber1(0);
+            room.setUnreadMessagesNumber2(0);
+
             return Optional.of(roomRepository.save(room)).map(roomMapper::toDto);
         }
 

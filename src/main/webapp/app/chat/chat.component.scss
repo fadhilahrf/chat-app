@@ -29,6 +29,7 @@
 .chats-list-header {
     background-color: $primary;
     padding: 10px;
+    display: flex;
 }
 
 .rooms-list-container {
@@ -116,10 +117,16 @@
     }
 }
 
-.message-input {
+.message-section {
     margin-top: auto;
-    display: flex;
     background-color: $info;
+    padding: 10px;
+}
+
+.message-input {
+    // margin-top: auto;
+    display: flex;
+    // background-color: $info;
 
     input {
         flex: 1;
@@ -193,6 +200,7 @@
     color: #fff;
     padding: 10px;
     p {
+        font-size: larger;
         font-weight: bold;
         margin: 0;
     }
@@ -263,8 +271,6 @@
 .message-box:hover .message-toggle{
     display: block;
     position: absolute;
-    background: var(--messageColor);
-    border-radius: 50%;
 }
 
 .room-toggle {
@@ -277,3 +283,72 @@
     border-radius: 50%;
 }
 
+.reply-section {
+    display: flex;
+}
+
+.reply-box {
+    background-color: $primary;
+    color: white;
+    margin: 0px 15px 0px 10px;
+    border-radius: 5px;
+    width: 90%;
+    flex: 1;
+    padding: 10px;
+    border-left: 3px solid gold;
+    
+    p {
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .content {
+        font-weight: bolder;
+        font-size: smaller;
+    }
+}
+
+.message-reply-box {
+    background-color: #205b97;
+    color: white;
+    border-radius: 5px;
+    padding: 10px;
+    min-width: 90%;
+    cursor: pointer;
+    border-left: 3px solid gold;
+
+    p {
+        font-weight: bold;
+        font-size: smaller;
+        margin: 0;
+    }
+
+    .content {
+        font-weight: bolder;
+        font-size: small;
+    }
+
+    .deleted {
+        font-style: italic;
+        font-weight: bolder;
+        font-size: small;
+    }
+}
+
+.header-title {
+    width: 95%;
+    justify-content: start;
+
+    .title {
+        font-size: xx-large;
+    }
+}
+
+.header-menu {
+    width: 5%;
+    justify-content: end;
+
+    .dropdown-toggle {
+        color: white;
+    }
+}

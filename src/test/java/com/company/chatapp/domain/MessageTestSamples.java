@@ -5,18 +5,29 @@ import java.util.UUID;
 public class MessageTestSamples {
 
     public static Message getMessageSample1() {
-        return new Message().id("id1").sender("sender1").recipient("recipient1").content("content1");
+        Message message = new Message();
+        message.setId("id1");
+        message.setSender("sender1");
+        message.setRecipient("recipient1");
+        message.setContent("content1");
+        return message;
     }
 
     public static Message getMessageSample2() {
-        return new Message().id("id2").sender("sender2").recipient("recipient2").content("content2");
+        Message message = new Message();
+        message.setId("id2");
+        message.setSender("sender2");
+        message.setRecipient("recipient2");
+        message.setContent("content2");
+        return message;
     }
 
     public static Message getMessageRandomSampleGenerator() {
-        return new Message()
-            .id(UUID.randomUUID().toString())
-            .sender(UUID.randomUUID().toString())
-            .recipient(UUID.randomUUID().toString())
-            .content(UUID.randomUUID().toString());
+        Message message = new Message();
+        message.setId(UUID.randomUUID().toString());
+        message.setSender(UUID.randomUUID().toString());
+        message.setRecipient(UUID.randomUUID().toString());
+        message.setContent(UUID.randomUUID().toString());
+        return message;
     }
 }

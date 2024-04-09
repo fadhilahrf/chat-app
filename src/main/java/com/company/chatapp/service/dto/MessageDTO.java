@@ -22,7 +22,7 @@ public class MessageDTO implements Serializable {
     @NotNull
     private String content;
 
-    private RoomDTO room;
+    private String roomId;
 
     private Instant deliveryTime = Instant.now();
 
@@ -31,6 +31,8 @@ public class MessageDTO implements Serializable {
     private Boolean isDeleted = false;
 
     private Boolean isEdited = false;
+
+    private MessageDTO replyTo;
 
     public String getId() {
         return id;
@@ -64,12 +66,12 @@ public class MessageDTO implements Serializable {
         this.content = content;
     }
 
-    public RoomDTO getRoom() {
-        return room;
+    public String getRoomId() {
+        return roomId;
     }
 
-    public void setRoom(RoomDTO room) {
-        this.room = room;
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 
     public Instant getDeliveryTime() {
@@ -104,6 +106,14 @@ public class MessageDTO implements Serializable {
         this.isEdited = isEdited;
     }
 
+    public MessageDTO getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(MessageDTO replyTo) {
+        this.replyTo = replyTo;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -133,7 +143,7 @@ public class MessageDTO implements Serializable {
             ", sender='" + getSender() + "'" +
             ", recipient='" + getRecipient() + "'" +
             ", content='" + getContent() + "'" +
-            ", room=" + getRoom() +
+            ", roomId=" + getRoomId() +
             "}";
     }
 }

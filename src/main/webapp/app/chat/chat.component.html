@@ -1,7 +1,47 @@
 <div class="chat-container" id="chat-page">
     <div class="chats-list">
         <div class="chats-list-header">
-            <h2><b>Chats</b></h2>
+            <div class="header-title">
+                <span class="title"><b>Chats</b></span>
+                <span class="badge rounded-pill bg-info">{{ unreadMessagesNumber }}</span>
+            </div>
+            <div
+                ngbDropdown
+                class="dropdown header-menu"
+                display="dynamic"
+            >
+                <a class="dropdown-toggle" ngbDropdownToggle href="javascript:void(0);">
+                    <fa-icon icon="ellipsis-v"></fa-icon>
+                </a>
+                <ul class="dropdown-menu" ngbDropdownMenu>
+                    <li>
+                        <a
+                        class="dropdown-item"
+                        routerLink="/account/settings"
+                        routerLinkActive="active"
+                        >
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                        class="dropdown-item"
+                        routerLink="/account/password"
+                        routerLinkActive="active"
+                        >
+                            <span>Password</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                        class="dropdown-item"
+                        (click)="logout()"
+                        >
+                            <span>Sign out</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
         <form id="searchForm" name="searchForm" >
             <div class="search-input p-2">
@@ -14,9 +54,9 @@
                 <ng-container *ngFor="let room of rooms; let i=index">
                     <li class="list-group-item" [ngClass]="selectedRecipient?.login==getRoomRecipient(room)?'active':''" >
                         <div
-                                ngbDropdown
-                                class="dropdown d-flex justify-content-end"
-                                display="dynamic"
+                            ngbDropdown
+                            class="dropdown d-flex justify-content-end"
+                            display="dynamic"
                         >
                             <a class="nav-link dropdown-toggle room-toggle" ngbDropdownToggle href="javascript:void(0);" [id]="'room-menu-'+room.id">
                                 <fa-icon icon="angle-down"></fa-icon>
@@ -42,7 +82,7 @@
                         </div>
                         <div (click)="getRecipientChat(getRoomRecipient(room));">
                             <div class="user">{{ getRoomRecipient(room) }} <span *ngIf="getUnreadMessagesNumber(room)" class="text-warning"> {{ getUnreadMessagesNumber(room) }} </span></div>
-                            <small class="message-overview"><span *ngIf="room.latestMessage?.read && account?.login==room.latestMessage?.sender" class="text-warning"><fa-icon icon="check" size="lg"></fa-icon>&nbsp;</span>{{ room.latestMessage?.content }} </small>
+                            <small class="message-overview"><span *ngIf="account?.login==room.latestMessage?.sender" [ngClass]="room.latestMessage?.read? 'text-warning':'text-info'"><fa-icon icon="check" size="lg"></fa-icon>&nbsp;</span>{{ room.latestMessage?.content }} </small>
                         </div>
                     </li>
                 </ng-container>
@@ -81,6 +121,14 @@
                                     <fa-icon icon="angle-down"></fa-icon>
                                 </a>
                                 <ul class="dropdown-menu" ngbDropdownMenu>
+                                    <li>
+                                        <a
+                                        class="dropdown-item"
+                                        (click)="selectMessageToReply(message)"
+                                        >
+                                        <span>Reply</span>
+                                        </a>
+                                    </li>
                                     <li *ngIf="message.sender==account!.login">
                                         <a
                                         class="dropdown-item"
@@ -107,18 +155,37 @@
                                     </li>
                                 </ul>
                             </div>
+                            <div *ngIf="message.replyTo" class="message-reply-box">
+                                <ng-container *ngIf="!message.replyTo.isDeleted">
+                                    <span> <p>{{ message.replyTo.sender }}</p> </span>
+                                    <span class="content"> {{ message.replyTo.content }} </span>
+                                </ng-container>
+                                <ng-container *ngIf="message.replyTo.isDeleted">
+                                    <span class="deleted"> Deleted </span>
+                                </ng-container>
+                            </div>
                             <p> {{ message.content }} </p>
-                            <span class="status"> <small *ngIf="message.isEdited">edited &nbsp;</small><span class="text-warning" *ngIf="message.read && message.sender==account?.login"><fa-icon icon="check" size="lg"></fa-icon> &nbsp; </span> {{ getTime(message.deliveryTime!.toString()) }}</span>
+                            <span class="status"> <small *ngIf="message.isEdited">edited &nbsp;</small><span *ngIf="message.sender==account?.login" [ngClass]="message.read? 'text-warning':'text-info'"><fa-icon icon="check" size="lg"></fa-icon> &nbsp; </span> {{ getTime(message.deliveryTime!.toString()) }}</span>
                         </div>
                     </ng-container>
                 </ng-container>
             </ng-container>
         </div>
         <form id="messageForm" name="messageForm" >
-            <div class="message-input p-2">
-                <input autocomplete="off" type="text" id="content" placeholder="Type your message..." name="content"  [(ngModel)]="messageForm!.content">
-                <button class="btn btn-link text-light" type="submit" (click)="sendMessage()" [disabled]="!messageForm.content"><fa-icon icon="angle-right" size="2xl"></fa-icon></button>
+            <div class="message-section">
+                <div *ngIf="selectedMessageToReply" class="reply-section">
+                    <div class="reply-box">
+                        <span> <p>{{ selectedMessageToReply.sender }}</p> </span>
+                        <span class="content"> {{ selectedMessageToReply.content }} </span>
+                    </div>
+                    <button class="btn btn-link text-light" type="button" (click)="removeSelectedMessageToReply()"><fa-icon icon="xmark" size="2xl"></fa-icon></button>
+                </div>
+                <div class="message-input p-2">
+                    <input #messageInput autocomplete="off" autofocus type="text" id="content" placeholder="Type your message..." name="content"  [(ngModel)]="messageForm!.content">
+                    <button class="btn btn-link text-light" type="submit" (click)="sendMessage()" [disabled]="!messageForm.content"><fa-icon icon="angle-right" size="2xl"></fa-icon></button>
+                </div>
             </div>
+
         </form>
     </div>
     <div class="chat-area" *ngIf="!selectedRecipient">

@@ -5,14 +5,26 @@ import java.util.UUID;
 public class RoomTestSamples {
 
     public static Room getRoomSample1() {
-        return new Room().id("id1").user1("user11").user2("user21");
+        Room room = new Room();
+        room.setId("id1");
+        room.setUser1("user11");
+        room.setUser2("user21");
+        return room;
     }
 
     public static Room getRoomSample2() {
-        return new Room().id("id2").user1("user12").user2("user22");
+        Room room = new Room();
+        room.setId("id2");
+        room.setUser1("user12");
+        room.setUser2("user22");
+        return room;
     }
 
     public static Room getRoomRandomSampleGenerator() {
-        return new Room().id(UUID.randomUUID().toString()).user1(UUID.randomUUID().toString()).user2(UUID.randomUUID().toString());
+        Room room = new Room();
+        room.setId(UUID.randomUUID().toString());
+        room.setUser1(UUID.randomUUID().toString());
+        room.setUser2(UUID.randomUUID().toString());
+        return room;
     }
 }

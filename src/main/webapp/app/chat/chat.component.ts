@@ -1,7 +1,7 @@
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import SharedModule from 'app/shared/shared.module';
 import { StompService } from 'app/shared/service/stomp.service';
-import { IUser, User } from 'app/entities/user/user.model';
+import { IUser } from 'app/entities/user/user.model';
 import { UserService } from 'app/entities/user/user.service';
 import { AccountService } from 'app/core/auth/account.service';
 import { Account } from 'app/core/auth/account.model';
@@ -14,16 +14,20 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DeleteDialogComponent } from './dialogs/delete-dialog/delete-dialog.component';
 import { DeleteConfirmation, DeleteType } from 'app/app.constants';
 import { MessageEditDialogComponent } from './dialogs/message-edit-dialog/message-edit-dialog.component';
+import { LoginService } from 'app/login/login.service';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'jhi-chat',
   standalone: true,
-  imports: [SharedModule],
+  imports: [SharedModule, RouterModule],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
 })
 export class ChatComponent implements OnInit {
   @ViewChild('chatMessages', { static: false }) private chatMessages?: ElementRef<HTMLElement>;
+
+  @ViewChild('messageInput', { static: false }) private messageInput?: ElementRef<HTMLInputElement>;
 
   ctx = '';
 
@@ -41,9 +45,9 @@ export class ChatComponent implements OnInit {
  
   selectedRecipient: IUser | null = null;
 
-  isInputFocused: boolean = false;
+  selectedMessageToReply: IMessage | null = null;
 
-  newMessageHeight = 0;
+  isInputFocused: boolean = false;
 
   firstUnreadMessageId = '';
 
@@ -51,12 +55,18 @@ export class ChatComponent implements OnInit {
 
   $info = '#0d6efd';
 
-  constructor(private userService: UserService, 
+  unreadMessagesNumber = 0;
+
+  constructor(
+    private userService: UserService, 
     private accountService: AccountService, 
     private roomService: RoomService, 
     private messageService: MessageService, 
     private stompService: StompService, 
-    private modalService: NgbModal) {}
+    private modalService: NgbModal,
+    private loginService: LoginService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.accountService.getAuthenticationState().subscribe(account => {
@@ -97,7 +107,10 @@ export class ChatComponent implements OnInit {
                 groupedMessage.messages.forEach(m=>{
                     if(m.id==message.id) {
                       m.read = message.read;
-                      this.updateRoomLatestMessage(message.room?.id!);
+                      if(this.unreadMessagesNumber>0) {
+                        this.unreadMessagesNumber--;
+                      }
+                      this.updateRoomLatestMessage(message.roomId!);
                     }
                 })
               });
@@ -122,7 +135,12 @@ export class ChatComponent implements OnInit {
                 if (m.id === message.id) {
                   m.isEdited = message.isEdited;
                   m.content = message.content;
-                  this.updateRoomLatestMessage(message.room?.id!);
+                  this.updateRoomLatestMessage(message.roomId!);
+                }
+
+                if(m.replyTo && m.replyTo.id==message.id) {
+                  m.replyTo.isEdited = message.isEdited;
+                  m.replyTo.content = message.content;
                 }
               })
             });
@@ -145,7 +163,14 @@ export class ChatComponent implements OnInit {
               groupedMessage.messages.forEach((item, index, object)=>{
                 if (item.id === message.id) {
                   object.splice(index, 1);
-                  this.updateRoomLatestMessage(message.room?.id!);
+                  if(this.unreadMessagesNumber>0) {
+                    this.unreadMessagesNumber--;
+                  }
+                  this.updateRoomLatestMessage(message.roomId!);
+                }
+
+                if(item.replyTo && item.replyTo.id == message.id) {
+                  item.replyTo.isDeleted = true;
                 }
               })
             });
@@ -163,12 +188,19 @@ export class ChatComponent implements OnInit {
         try {
           if(JSON.parse(payload.body)) {
             const room: IRoom = JSON.parse(payload.body);
+            
+            if((this.selectedRecipient?.login==room.user1 || this.selectedRecipient?.login==room.user2) && this.selectedRecipient?.login!=this.account!.login) {
+              this.selectedRecipient = null;
+            }
 
             this.rooms.forEach((item, index, object)=>{
               if (item.id === room.id) {
                 object.splice(index, 1);
-                if((this.selectedRecipient?.login==room.user1 || this.selectedRecipient?.login==room.user2) && this.selectedRecipient?.login!=this.account!.login) {
-                  this.selectedRecipient = null;
+
+                if(room.user1==this.account?.login) {
+                  this.unreadMessagesNumber=this.unreadMessagesNumber-item.unreadMessagesNumber1!;
+                }else {
+                  this.unreadMessagesNumber=this.unreadMessagesNumber-item.unreadMessagesNumber2!;
                 }
               }
             })
@@ -209,7 +241,6 @@ export class ChatComponent implements OnInit {
     this.userService.getByLogin(login).subscribe(res=>{
       if(res.body) {
         this.selectedRecipient = res.body;
-        this.newMessageHeight = 0;
         this.getMessages(this.selectedRecipient, true);
       }
     })
@@ -219,6 +250,14 @@ export class ChatComponent implements OnInit {
     this.roomService.getAllRoomsForUserSortedByLatestMessageTime().subscribe(res=>{
       if(res.body) {
         this.rooms = res.body;
+        this.unreadMessagesNumber=0;
+        this.rooms.forEach(room=>{
+          if(room.user1==this.account?.login) {
+            this.unreadMessagesNumber+=room.unreadMessagesNumber1!;
+          }else {
+            this.unreadMessagesNumber+=room.unreadMessagesNumber2!;
+          }
+        })
       }
     });
   }
@@ -255,7 +294,6 @@ export class ChatComponent implements OnInit {
                         isFirstUnreadMessage = false;
                       }
                       m.read = true;
-                      this.newMessageHeight+=50;
                       unreadMessages.push(m);
                     }
                   
@@ -284,6 +322,10 @@ export class ChatComponent implements OnInit {
       this.messageForm.sender = this.account!.login;
       this.messageForm.recipient = this.selectedRecipient.login;
       this.messageForm.read = false;
+      if(this.selectedMessageToReply) {
+        this.messageForm.replyTo = this.selectedMessageToReply;
+        this.selectedMessageToReply = null;
+      }
       this.stompService.send('/app/message', {}, JSON.stringify(this.messageForm));
       this.messageForm.content = null;
       this.getMessages(this.selectedRecipient, true);
@@ -314,6 +356,11 @@ export class ChatComponent implements OnInit {
     }else {
     this.chatMessages!.nativeElement.scrollTop = this.chatMessages!.nativeElement.scrollHeight;
     }
+  }
+
+  scrollToRepliedMessage(id: string): void {
+    const targetElement = <HTMLElement> document.getElementById(id);
+    this.chatMessages!.nativeElement.scrollTop = this.chatMessages!.nativeElement.scrollHeight;
   }
 
   onSearchInputFocused(): void {
@@ -385,5 +432,24 @@ export class ChatComponent implements OnInit {
 
   countNotDeletedMessages(messages: IMessage[]): number {
     return messages.filter(m=>!m.isDeleted).length;
+  }
+
+  selectMessageToReply(message: IMessage): void {
+    this.selectedMessageToReply = message;
+    this.messageInput?.nativeElement.focus();
+  }
+
+  removeSelectedMessageToReply(): void {
+    this.selectedMessageToReply = null;
+  }
+
+  logout(): void {
+    const user: IUser = {
+      id: '',
+      login: this.account?.login,
+    }
+    this.loginService.logout();
+    this.stompService.send('/app/user.disconnect', {}, JSON.stringify(user));
+    this.router.navigate(['']);
   }
 }

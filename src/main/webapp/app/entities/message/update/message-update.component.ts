@@ -23,7 +23,7 @@ export class MessageUpdateComponent implements OnInit {
   isSaving = false;
   message: IMessage | null = null;
 
-  roomsSharedCollection: IRoom[] = [];
+  roomsSharedCollection: string[] = [];
 
   editForm: MessageFormGroup = this.messageFormService.createMessageFormGroup();
 
@@ -84,14 +84,14 @@ export class MessageUpdateComponent implements OnInit {
     this.message = message;
     this.messageFormService.resetForm(this.editForm, message);
 
-    this.roomsSharedCollection = this.roomService.addRoomToCollectionIfMissing<IRoom>(this.roomsSharedCollection, message.room);
+    this.roomsSharedCollection = this.roomService.addIdRoomToCollectionIfMissing<string>(this.roomsSharedCollection, message.roomId!);
   }
 
   protected loadRelationshipsOptions(): void {
     this.roomService
       .query()
       .pipe(map((res: HttpResponse<IRoom[]>) => res.body ?? []))
-      .pipe(map((rooms: IRoom[]) => this.roomService.addRoomToCollectionIfMissing<IRoom>(rooms, this.message?.room)))
-      .subscribe((rooms: IRoom[]) => (this.roomsSharedCollection = rooms));
+      .pipe(map((rooms: IRoom[]) => this.roomService.addIdRoomToCollectionIfMissing<string>(rooms.map(r=> r.id), this.message?.roomId)))
+      .subscribe((rooms: string[]) => (this.roomsSharedCollection = rooms));
   }
 }

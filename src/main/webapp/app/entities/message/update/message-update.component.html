@@ -50,11 +50,11 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label" for="field_room">Room</label>
+          <label class="form-label" for="field_roomId">Room Id</label>
           <select class="form-control" id="field_room" data-cy="room" name="room" formControlName="room" [compareWith]="compareRoom">
             <option [ngValue]="null"></option>
             @for (roomOption of roomsSharedCollection; track $index) {
-              <option [ngValue]="roomOption">{{ roomOption.id }}</option>
+              <option [ngValue]="roomOption">{{ roomOption }}</option>
             }
           </select>
         </div>

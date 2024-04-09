@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface MessageRepository extends MongoRepository<Message, String> {
-    public List<Message> findAllByRoom(Room room);
+    public List<Message> findAllByRoomId(String roomId);
 
-    public Optional<Message> findFirstByRoomAndDeletedByNotContainingOrderByDeliveryTimeDesc(Room room, String deletedBy);
+    public Optional<Message> findFirstByRoomIdAndDeletedByNotContainingOrderByDeliveryTimeDesc(String roomId, String deletedBy);
 }

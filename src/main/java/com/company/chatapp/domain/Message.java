@@ -1,6 +1,5 @@
 package com.company.chatapp.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.*;
 
 import java.time.Instant;
@@ -9,6 +8,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * A Message.
@@ -34,10 +35,8 @@ public class Message extends AbstractAuditingEntity<String> {
     @Field("content")
     private String content;
 
-    @DBRef
-    @Field("room")
-    @JsonIgnoreProperties(value = { "messages" }, allowSetters = true)
-    private Room room;
+    @Field("roomId")
+    private String roomId;
 
     @Field("delivery_time")
     private Instant deliveryTime = Instant.now();
@@ -51,15 +50,13 @@ public class Message extends AbstractAuditingEntity<String> {
     @Field("deleted_by")
     private String deletedBy="";
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
+    @DBRef
+    @Field("replay_to")
+    @JsonIgnoreProperties(value = { "replyTo" }, allowSetters = true)
+    private Message replyTo;
 
     public String getId() {
         return this.id;
-    }
-
-    public Message id(String id) {
-        this.setId(id);
-        return this;
     }
 
     public void setId(String id) {
@@ -70,22 +67,12 @@ public class Message extends AbstractAuditingEntity<String> {
         return this.sender;
     }
 
-    public Message sender(String sender) {
-        this.setSender(sender);
-        return this;
-    }
-
     public void setSender(String sender) {
         this.sender = sender;
     }
 
     public String getRecipient() {
         return this.recipient;
-    }
-
-    public Message recipient(String recipient) {
-        this.setRecipient(recipient);
-        return this;
     }
 
     public void setRecipient(String recipient) {
@@ -96,26 +83,16 @@ public class Message extends AbstractAuditingEntity<String> {
         return this.content;
     }
 
-    public Message content(String content) {
-        this.setContent(content);
-        return this;
-    }
-
     public void setContent(String content) {
         this.content = content;
     }
 
-    public Room getRoom() {
-        return this.room;
+    public String getRoomId() {
+        return roomId;
     }
 
-    public void setRoom(Room room) {
-        this.room = room;
-    }
-
-    public Message room(Room room) {
-        this.setRoom(room);
-        return this;
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 
     public Instant getDeliveryTime() {
@@ -150,7 +127,13 @@ public class Message extends AbstractAuditingEntity<String> {
         this.deletedBy = deletedBy;
     }
 
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
+    public Message getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(Message replyTo) {
+        this.replyTo = replyTo;
+    }
 
     @Override
     public boolean equals(Object o) {

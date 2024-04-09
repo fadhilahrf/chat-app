@@ -82,9 +82,9 @@
               <td>{{ message.recipient }}</td>
               <td>{{ message.content }}</td>
               <td>
-                @if (message.room) {
+                @if (message.roomId) {
                   <div>
-                    <a [routerLink]="['/room', message.room.id, 'view']">{{ message.room.id }}</a>
+                    <a [routerLink]="['/room', message.roomId, 'view']">{{ message.roomId }}</a>
                   </div>
                 }
               </td>

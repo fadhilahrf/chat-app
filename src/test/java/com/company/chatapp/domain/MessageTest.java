@@ -28,10 +28,7 @@ class MessageTest {
         Message message = getMessageRandomSampleGenerator();
         Room roomBack = getRoomRandomSampleGenerator();
 
-        message.setRoom(roomBack);
-        assertThat(message.getRoom()).isEqualTo(roomBack);
-
-        message.room(null);
-        assertThat(message.getRoom()).isNull();
+        message.setRoomId(roomBack.getId());
+        assertThat(message.getRoomId()).isEqualTo(roomBack);
     }
 }

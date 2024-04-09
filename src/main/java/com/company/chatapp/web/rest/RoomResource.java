@@ -205,8 +205,6 @@ public class RoomResource {
             RoomDTO roomDTO = roomOptional.get();
             roomDTO.setLatestMessage(null);
             roomDTO.setLatestMessageTime(null);
-            roomDTO.setUnreadMessagesNumber1(null);
-            roomDTO.setUnreadMessagesNumber2(null);
 
             messagingTemplate.convertAndSendToUser(
                 username, "/room/deleted",
@@ -215,7 +213,7 @@ public class RoomResource {
         }
     }
 
-    @MessageMapping("/room/delete/{id}//all-users")
+    @MessageMapping("/room/delete/{id}/all-users")
     public void softDeleteByAllUsers(@DestinationVariable("id") String id) {
         log.debug("REST request to soft delete Message for All Users : {}", id);
         Optional<RoomDTO> roomOptional = roomService.softDeleteForAllUsers(id);
@@ -223,8 +221,6 @@ public class RoomResource {
             RoomDTO roomDTO = roomOptional.get();
             roomDTO.setLatestMessage(null);
             roomDTO.setLatestMessageTime(null);
-            roomDTO.setUnreadMessagesNumber1(null);
-            roomDTO.setUnreadMessagesNumber2(null);
 
             messagingTemplate.convertAndSendToUser(
                 roomDTO.getUser1(), "/room/deleted",

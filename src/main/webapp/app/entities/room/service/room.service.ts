@@ -81,4 +81,24 @@ export class RoomService {
     }
     return roomCollection;
   }
+
+  
+  addIdRoomToCollectionIfMissing<Type>(
+    roomCollection: string[],
+    ...roomIdsToCheck: (string | null | undefined)[]
+  ): string[] {
+    const rooms: string[] = roomIdsToCheck.filter(isPresent);
+    if (rooms.length > 0) {
+      const roomsToAdd = rooms.filter(roomItem => {
+        
+        if (roomCollection.includes(roomItem)) {
+          return false;
+        }
+        roomCollection.push(roomItem);
+        return true;
+      });
+      return [...roomsToAdd, ...roomCollection];
+    }
+    return roomCollection;
+  }
 }

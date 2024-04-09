@@ -40,15 +40,8 @@ public class Room extends AbstractAuditingEntity<String> {
     @Field("unread_messages_number2")
     private Integer unreadMessagesNumber2 = 0;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
-
     public String getId() {
         return this.id;
-    }
-
-    public Room id(String id) {
-        this.setId(id);
-        return this;
     }
 
     public void setId(String id) {
@@ -59,11 +52,6 @@ public class Room extends AbstractAuditingEntity<String> {
         return this.user1;
     }
 
-    public Room user1(String user1) {
-        this.setUser1(user1);
-        return this;
-    }
-
     public void setUser1(String user1) {
         this.user1 = user1;
     }
@@ -72,22 +60,12 @@ public class Room extends AbstractAuditingEntity<String> {
         return this.user2;
     }
 
-    public Room user2(String user2) {
-        this.setUser2(user2);
-        return this;
-    }
-
     public void setUser2(String user2) {
         this.user2 = user2;
     }
 
     public String getDeletedBy() {
         return this.deletedBy;
-    }
-
-    public Room deletedBy(String deletedBy) {
-        this.setDeletedBy(deletedBy);
-        return this;
     }
 
     public void setDeletedBy(String deletedBy) {
@@ -117,8 +95,6 @@ public class Room extends AbstractAuditingEntity<String> {
     public void setUnreadMessagesNumber2(Integer unreadMessagesNumber2) {
         this.unreadMessagesNumber2 = unreadMessagesNumber2;
     }
-    
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
     public boolean equals(Object o) {

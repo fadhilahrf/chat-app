@@ -81,7 +81,7 @@ public class MessageService {
         room.setDeletedBy(String.join(";", roomDeleters.stream().filter(s -> !s.isEmpty()).toList()));
 
         roomService.save(new RoomDTO(room));
-        message.setRoom(room);
+        message.setRoomId(room.getId());
         
         message = messageRepository.save(message);
         return messageMapper.toDto(message);
@@ -152,11 +152,19 @@ public class MessageService {
         Optional<Room> roomOptional = roomService.findByUser1AndUser2(sender, recipient);
         if(roomOptional.isPresent()){
             Room room = roomOptional.get();
-            return messageRepository.findAllByRoom(room).stream().filter(message->{
+            List<MessageDTO> messageDTOs = messageRepository.findAllByRoomId(room.getId()).stream().filter(message->{
                 List<String> messageDeleters = new ArrayList<>(Arrays.asList(message.getDeletedBy().split(";")));
                 List<String> roomDeleters = new ArrayList<>(Arrays.asList(room.getDeletedBy().split(";")));
                 return !messageDeleters.contains(sender) && !roomDeleters.contains(sender);
             }).map(messageMapper::toDto).toList();
+
+            List<String> messageIds = messageDTOs.stream().map(m->m.getId()).toList();
+            return messageDTOs.stream().map(m -> {
+                if(m.getReplyTo()!=null && !messageIds.contains(m.getReplyTo().getId())) {
+                    m.getReplyTo().setIsDeleted(true);
+                }
+                return m;
+            }).toList();
         } else {
             return new ArrayList<>();
         }

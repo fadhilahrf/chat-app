@@ -21,7 +21,7 @@ type MessageFormGroupContent = {
   sender: FormControl<IMessage['sender']>;
   recipient: FormControl<IMessage['recipient']>;
   content: FormControl<IMessage['content']>;
-  room: FormControl<IMessage['room']>;
+  roomId: FormControl<IMessage['roomId']>;
 };
 
 export type MessageFormGroup = FormGroup<MessageFormGroupContent>;
@@ -50,7 +50,7 @@ export class MessageFormService {
       content: new FormControl(messageRawValue.content, {
         validators: [Validators.required],
       }),
-      room: new FormControl(messageRawValue.room),
+      roomId: new FormControl(messageRawValue.roomId),
     });
   }
 
