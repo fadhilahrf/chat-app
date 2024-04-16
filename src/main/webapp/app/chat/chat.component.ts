@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import SharedModule from 'app/shared/shared.module';
 import { StompService } from 'app/shared/service/stomp.service';
 import { IUser } from 'app/entities/user/user.model';
@@ -10,12 +10,13 @@ import { MessageService } from 'app/entities/message/service/message.service';
 import dayjs from 'dayjs/esm';
 import { IRoom } from 'app/entities/room/room.model';
 import { RoomService } from 'app/entities/room/service/room.service';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdown, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DeleteDialogComponent } from './dialogs/delete-dialog/delete-dialog.component';
 import { DeleteConfirmation, DeleteType } from 'app/app.constants';
 import { MessageEditDialogComponent } from './dialogs/message-edit-dialog/message-edit-dialog.component';
 import { LoginService } from 'app/login/login.service';
 import { Router, RouterModule } from '@angular/router';
+import { timer } from 'rxjs';
 
 @Component({
   selector: 'jhi-chat',
@@ -57,6 +58,16 @@ export class ChatComponent implements OnInit {
 
   unreadMessagesNumber = 0;
 
+  screenWidth?: number;
+
+  SCREEN_WIDTH_THRESHOLD = 450;
+
+ showDropdown = false;
+
+//  mouseDownTime = 0;
+
+ clickDurationThreshold: number = 1000; 
+
   constructor(
     private userService: UserService, 
     private accountService: AccountService, 
@@ -66,7 +77,10 @@ export class ChatComponent implements OnInit {
     private modalService: NgbModal,
     private loginService: LoginService,
     private router: Router,
-  ) {}
+    private elementRef: ElementRef
+  ) {
+    this.getScreenSize();
+  }
 
   ngOnInit(): void {
     this.accountService.getAuthenticationState().subscribe(account => {
@@ -451,5 +465,14 @@ export class ChatComponent implements OnInit {
     this.loginService.logout();
     this.stompService.send('/app/user.disconnect', {}, JSON.stringify(user));
     this.router.navigate(['']);
+  }
+
+  @HostListener('window:resize', ['$event'])
+  private getScreenSize(): void {
+    this.screenWidth = window.innerWidth;
+  }
+
+  backToChatList(): void {
+    this.selectedRecipient = null;
   }
 }

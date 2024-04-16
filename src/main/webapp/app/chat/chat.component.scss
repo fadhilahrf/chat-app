@@ -1,17 +1,58 @@
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 
-.chat-container {
-    display: flex;
-    max-width: 100%;
-    min-width: 600px;
-    min-height: 600px;
-    max-height: 600px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+
+@media (min-width:451px) {
+    .chat-container {
+        display: flex;
+        max-width: 100%;
+        min-width: 600px;
+        height: 100vh;
+        overflow: hidden;
+    }
+    
+    .recipient-header {
+        background-color: $primary;
+        color: #fff;
+        padding: 10px;
+        p {
+            font-size: larger;
+            font-weight: bold;
+            margin: 0;
+        }
+    }
+
+    .message-section {
+        margin-top: auto;
+        background-color: $info;
+        padding: 10px;
+    }
+  }
+
+@media (max-width:450px) {
+    .chat-container {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .recipient-header {
+        background-color: $primary;
+        color: #fff;
+        padding: 10px;
+        display: flex;
+        p {
+            font-size: larger;
+            font-weight: bold;
+            margin: 0;
+        }
+    }
+
+    .message-section {
+        margin-top: auto;
+        background-color: $info;
+        padding: 5px;
+    }
 }
 
 .chats-list {
@@ -117,16 +158,8 @@
     }
 }
 
-.message-section {
-    margin-top: auto;
-    background-color: $info;
-    padding: 10px;
-}
-
 .message-input {
-    // margin-top: auto;
     display: flex;
-    // background-color: $info;
 
     input {
         flex: 1;
@@ -193,17 +226,6 @@
     border-radius: 5px;
     cursor: pointer;
     width: 100%;
-}
-
-.recipient-header {
-    background-color: $primary;
-    color: #fff;
-    padding: 10px;
-    p {
-        font-size: larger;
-        font-weight: bold;
-        margin: 0;
-    }
 }
 
 .separator {
@@ -277,7 +299,7 @@
     display: none;
 }
 
-.list-group-item:hover .room-toggle{
+.room-toggle{
     display: block;
     position: absolute;
     border-radius: 50%;
